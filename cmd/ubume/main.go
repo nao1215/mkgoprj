@@ -170,20 +170,23 @@ func (p project) goModInit() {
 }
 
 func (p project) canMake() {
-	canUseGoCmd()
-	canMakePrjDir(p.name)
+	p.canUseGoCmd()
+	p.canMakePrjDir()
 }
 
-func canUseGoCmd() {
+func (p project) canUseGoCmd() {
 	_, err := exec.LookPath("go")
 	if err != nil {
 		die("this system does not install go cmd. Please download golang")
 	}
 }
 
-func canMakePrjDir(path string) {
-	if exists(path) {
+func (p project) canMakePrjDir() {
+	if exists(p.name) {
 		die("same name project already exists at current directory")
+	}
+	if p.name == "" {
+		die("project name is empty (import path end with \"/\"?)")
 	}
 }
 
