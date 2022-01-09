@@ -1,3 +1,4 @@
+[![Build](https://github.com/nao1215/ubume/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/nao1215/ubume/actions/workflows/build.yml)
 # ubume - Golang project generator
 ubume command generate golang project at current directory. Currently, ubume can only generate application projects. However, in the future ubume will also be able to generate library projects.
   
