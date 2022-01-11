@@ -7,7 +7,7 @@ ubume command generate golang project at current directory. Currently, ubume can
 If you don't install golang in your system, please install Golang first. Check the [Go official website](https://go.dev/doc/install) for how to install golang.
 ## Step2. Install ubume
 ```
-$ go install github.com/nao1215/ubume/cmd/ubume
+$ go install github.com/nao1215/ubume/cmd/ubume@latest
 ```
   
 # How to use
@@ -19,8 +19,9 @@ sample/
 ├── Changelog.md
 ├── Makefile
 ├── cmd
-│   └── sample
-│       └── main.go
+│      └── sample
+│              ├── main.go
+│              └── main_test.go
 └── go.mod
 
 $ cd sample
@@ -30,4 +31,12 @@ Changelog.md  Makefile  cmd  go.mod  sample
 
 $ ./sample 
 Hello, World
+
+$ make    (Show make target list and what to do)
+build           Build binary 
+clean           Clean project
+deps            Dependency resolution for build
+fmt             Format go source code 
+test            Start test
+vet             Start go vet
 ```
