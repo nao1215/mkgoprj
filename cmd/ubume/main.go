@@ -83,6 +83,7 @@ func (p project) makeProjectDirs() {
 
 func (p project) makeFiles() {
 	p.makeMainSourecCodeFile()
+	p.makeMainSourecCodeTestFile()
 	p.makeMakefile()
 	p.makeChangelogFile()
 }
@@ -94,7 +95,26 @@ func (p project) makeMainSourecCodeFile() {
 import "fmt"
 
 func main() {
-	fmt.Println("Hello, World")
+	fmt.Println(HelloWorld())
+}
+
+func HelloWorld() string {
+	return "Hello, World"
+}
+`
+	writeFile(code, path)
+}
+
+func (p project) makeMainSourecCodeTestFile() {
+	path := filepath.Join(p.name, "cmd", p.name, "main_test.go")
+	code := `package main
+
+import "testing"
+
+func TestHelloWorld(t *testing.T) {
+	if HelloWorld() != "Hello, World" {
+		t.Errorf("HelloWorlf = %s, want \"Hello, World\"", HelloWorld())
+	}
 }
 `
 	writeFile(code, path)
@@ -111,6 +131,7 @@ GO_FORMAT   = $(GO) fmt
 GOFMT       = gofmt
 GO_LIST     = $(GO) list
 GO_TEST     = $(GO) test -v
+GO_TOOL     = $(GO) tool
 GO_VET      = $(GO) vet
 GO_DEP      = $(GO) mod
 GO_LDFLAGS  = -ldflags="-s -w"
@@ -122,13 +143,14 @@ build: deps ## Build binary
 	env GO111MODULE=on GOOS=$(GOOS) $(GO_BUILD) $(GO_LDFLAGS) -o $(APP) XXX_CODE_XXX
 
 clean: ## Clean project
-	-rm -rf ./vendor $(APP)
+	-rm -rf ./vendor $(APP) cover.out cover.html
 
 deps: ## Dependency resolution for build
 	$(GO_DEP) vendor
 
 test: ## Start test
-	env GOOS=$(GOOS) $(GO_TEST) $(GO_PKGROOT)
+	env GOOS=$(GOOS) $(GO_TEST) -cover $(GO_PKGROOT) -coverprofile=cover.out
+	$(GO_TOOL) cover -html=cover.out -o cover.html
 
 vet: ## Start go vet
 	$(GO_VET) $(GO_PACKAGES)
