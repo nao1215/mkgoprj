@@ -14,6 +14,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package main
 
 import (
@@ -34,19 +35,21 @@ type options struct {
 var osExit = os.Exit
 
 const cmdName string = "ubume"
-const version string = "0.5.0"
+const version string = "0.5.2"
 
 const (
 	exitSuccess int = iota // 0
 	exitFailure
 )
 
+// project have project information to be generated.
 type project struct {
-	importPath string
-	name       string
-	version    string
+	importPath string // same as "$ git mod init <importPath>"
+	name       string // project (command) name
+	version    string // project version
 }
 
+// main is entry point of ubume command.
 func main() {
 	var opts options
 	var args []string
@@ -56,17 +59,20 @@ func main() {
 		osExit(exitFailure)
 	}
 
-	prj := initProject(args)
+	prj := newProject(args)
 	prj.canMake()
 	prj.make()
 }
 
+// make generate project directory and files.
 func (p project) make() {
 	p.makeProjectDirs()
 	p.makeFiles()
 	p.goModInit()
 }
 
+// makeProjectDirs create all directories in project template.
+// If it can not make directories, exit command.
 func (p project) makeProjectDirs() {
 	dirs := []string{
 		filepath.Join(p.name, "cmd", p.name),
@@ -81,6 +87,7 @@ func (p project) makeProjectDirs() {
 	}
 }
 
+// makeProjectDirs create all files in project template.
 func (p project) makeFiles() {
 	p.makeMainSourecCodeFile()
 	p.makeMainSourecCodeTestFile()
@@ -88,6 +95,7 @@ func (p project) makeFiles() {
 	p.makeChangelogFile()
 }
 
+// makeMainSourecCodeFile create file that is source code for command.
 func (p project) makeMainSourecCodeFile() {
 	path := filepath.Join(p.name, "cmd", p.name, "main.go")
 	code := `package main
@@ -105,6 +113,7 @@ func HelloWorld() string {
 	writeFile(code, path)
 }
 
+// makeMainSourecCodeTestFile create file that is test source code for command.
 func (p project) makeMainSourecCodeTestFile() {
 	path := filepath.Join(p.name, "cmd", p.name, "main_test.go")
 	code := `package main
@@ -120,6 +129,7 @@ func TestHelloWorld(t *testing.T) {
 	writeFile(code, path)
 }
 
+// makeMakefile create Makefile at project template root directory.
 func (p project) makeMakefile() {
 	path := filepath.Join(p.name, "Makefile")
 	data := `.PHONY: build test clean vet fmt chkfmt
@@ -169,6 +179,7 @@ help:
 	writeFile(data, path)
 }
 
+// makeChangelogFile create CHAGELOG.md at project template root directory.
 func (p project) makeChangelogFile() {
 	path := filepath.Join(p.name, "Changelog.md")
 	data := `# Changelog
@@ -179,6 +190,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 	writeFile(data, path)
 }
 
+// goModInit execute "$ go mod init <importPath>"
+// If it can not execute "$ go mod", exit command.
 func (p project) goModInit() {
 	err := os.Chdir(p.name)
 	if err != nil {
@@ -191,11 +204,15 @@ func (p project) goModInit() {
 	}
 }
 
+// canMake check whether can create project template or not.
+// If it can't create the project, exit command.
 func (p project) canMake() {
 	p.canUseGoCmd()
 	p.canMakePrjDir()
 }
 
+// canUseGoCmd check whether go command install in the system.
+// If not install, exit command.
 func (p project) canUseGoCmd() {
 	_, err := exec.LookPath("go")
 	if err != nil {
@@ -203,6 +220,8 @@ func (p project) canUseGoCmd() {
 	}
 }
 
+// canMakePrjDir exit the command if there is a directory with the same name or
+// if the project name is an empty string.
 func (p project) canMakePrjDir() {
 	if exists(p.name) {
 		die("same name project already exists at current directory")
@@ -212,16 +231,20 @@ func (p project) canMakePrjDir() {
 	}
 }
 
+// die exit program with message.
 func die(msg string) {
 	fmt.Fprintln(os.Stderr, cmdName+": "+msg)
 	osExit(exitFailure)
 }
 
+// exists check whether file or directory exists.
 func exists(path string) bool {
 	_, err := os.Stat(path)
 	return (err == nil)
 }
 
+// writeFile write string to file.
+// If it can not create file, exit command.
 func writeFile(text string, path string) {
 	file, err := os.Create(path)
 	if err != nil {
@@ -231,7 +254,8 @@ func writeFile(text string, path string) {
 	file.Write(([]byte)(text))
 }
 
-func initProject(arg []string) project {
+// newProject return initialized project struct.
+func newProject(arg []string) project {
 	var prj project
 	prj.importPath = arg[0]
 
@@ -245,8 +269,10 @@ func initProject(arg []string) project {
 	return prj
 }
 
+// parseArgs parse command line arguments.
+// In this method, process for version option, help option, and lack of arguments.
 func parseArgs(opts *options) ([]string, error) {
-	p := initParser(opts)
+	p := newParser(opts)
 
 	args, err := p.Parse()
 	if err != nil {
@@ -265,17 +291,21 @@ func parseArgs(opts *options) ([]string, error) {
 	return args, nil
 }
 
+// showHelp show help messages.
 func showHelp(p *flags.Parser) {
 	p.WriteHelp(os.Stdout)
 }
 
-func initParser(opts *options) *flags.Parser {
+// newParser return initialized flags.Parser.
+func newParser(opts *options) *flags.Parser {
 	parser := flags.NewParser(opts, flags.Default)
 	parser.Name = cmdName
 	parser.Usage = "[OPTIONS] IMPORT_PATH    ※ IMPORT_PATH is same as $ go mod init IMPORT_PATH"
 
 	return parser
 }
+
+// showVersion show ubume command version information.
 func showVersion(cmdName string, version string) {
 	description := cmdName + " version " + version + " (under Apache License verison 2.0)"
 	fmt.Fprintln(os.Stdout, description)
