@@ -57,6 +57,7 @@ func main() {
 	var opts options
 	args := parseArgs(&opts)
 	prj := newProject(args, opts)
+	prj.canMake()
 	prj.makes()
 }
 
