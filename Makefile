@@ -12,16 +12,13 @@ GO_DEP      = $(GO) mod
 GO_LDFLAGS  = -ldflags="-s -w"
 GOOS        = linux
 GO_PKGROOT  = ./...
-GO_PACKAGES = $(shell $(GO_LIST) $(GO_PKGROOT) | grep -v vendor)
+GO_PACKAGES = $(shell $(GO_LIST) $(GO_PKGROOT))
 
-build: deps ## Build binary 
+build:  ## Build binary 
 	env GO111MODULE=on GOOS=$(GOOS) $(GO_BUILD) $(GO_LDFLAGS) -o $(APP) cmd/ubume/main.go
 
 clean: ## Clean project
-	-rm -rf ./vendor $(APP)
-
-deps: ## Dependency resolution for build
-	$(GO_DEP) vendor
+	-rm -rf $(APP)
 
 test: ## Start the test
 	env GOOS=$(GOOS) $(GO_TEST) $(GO_PKGROOT)
