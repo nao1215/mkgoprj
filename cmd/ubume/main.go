@@ -22,6 +22,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 
@@ -36,7 +37,7 @@ type options struct {
 var osExit = os.Exit
 
 const cmdName string = "ubume"
-const version string = "1.0.0"
+const version string = "1.1.0"
 
 const (
 	exitSuccess int = iota // 0
@@ -68,6 +69,7 @@ func (p project) makeAppPrj() {
 	p.goModInit()
 }
 
+// makeLibPrj generate library project directory and files.
 func (p project) makeLibPrj() {
 	p.makeProjectDirs()
 	p.makeLibProjectFiles()
@@ -77,11 +79,11 @@ func (p project) makeLibPrj() {
 // makeProjectDirs create all directories in project template.
 // If it can not make directories, exit command.
 func (p project) makeProjectDirs() {
-	var dirs []string
+	dirs := []string{filepath.Join(p.name, ".github", "workflows")}
 	if p.library {
-		dirs = []string{p.name}
+		dirs = append(dirs, p.name)
 	} else {
-		dirs = []string{filepath.Join(p.name, "cmd", p.name)}
+		dirs = append(dirs, filepath.Join(p.name, "cmd", p.name))
 	}
 	mkDirs(dirs)
 }
@@ -99,20 +101,23 @@ func mkDirs(paths []string) {
 	}
 }
 
-// makeProjectDirs create all files in project template.
+// makeProjectDirs create all files in application project template.
 func (p project) makeAppProjectFiles() {
 	p.makeAppMainSourecCodeFile()
 	p.makeTestFile()
 	p.makeDocGoFile()
 	p.makeMakefileForApp()
+	p.makeGitHubActionsFile()
 	p.makeChangelogFile()
 }
 
+// makeLibProjectFiles create all files in library project template.
 func (p project) makeLibProjectFiles() {
 	p.makeLibSourceCodeFile()
 	p.makeTestFile()
 	p.makeDocGoFile()
 	p.makeMakefileForLib()
+	p.makeGitHubActionsFile()
 	p.makeChangelogFile()
 }
 
@@ -286,6 +291,79 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 `
 	writeFile(data, path)
+}
+
+// makeGitHubActions make build.yml and test.yml for GitHub Actions workflows.
+func (p project) makeGitHubActionsFile() {
+	if !p.library {
+		p.makeBuildYml()
+	}
+	p.makeUnitTestYml()
+}
+
+func (p project) makeBuildYml() {
+	path := filepath.Join(p.name, ".github", "workflows", "build.yml")
+	data := `name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: XXX_VER_XXX
+
+    - name: Build
+      run: make build
+`
+	data = strings.Replace(data, "XXX_VER_XXX", goVersion(), 1)
+	writeFile(data, path)
+}
+
+func (p project) makeUnitTestYml() {
+	path := filepath.Join(p.name, ".github", "workflows", "unit_test.yml")
+	data := `name: UnitTest
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - name: UnitTest
+      run: make test
+`
+	data = strings.Replace(data, "XXX_VER_XXX", goVersion(), 1)
+	writeFile(data, path)
+}
+
+// goVersion return runtime golang version(only number, not include "go" or "cpu name")
+func goVersion() string {
+	runtimeVer := runtime.Version()
+
+	rex := regexp.MustCompile("[0-9]\\.[0-9]*")
+	return rex.FindString(runtimeVer)
 }
 
 // goModInit execute "$ go mod init <importPath>"

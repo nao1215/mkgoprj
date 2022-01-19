@@ -1,6 +1,6 @@
 [![Build](https://github.com/nao1215/ubume/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/nao1215/ubume/actions/workflows/build.yml)  
 # ubume - Golngプロジェクトテンプレートジェネレータ
-ubumeコマンドは、golangプロジェクトテンプレートをカレントディレクトリに作成します。Version 1.0.0では、アプリケーションプロジェクトとライブラリプロジェクトが作成できます。
+ubumeコマンドは、golangプロジェクトテンプレートをカレントディレクトリに作成します。Version 1.0.0では、アプリケーションプロジェクトとライブラリプロジェクトが作成できます。自動生成するファイルには、「プロジェクト管理を簡単にするMakefile」と「GitHub Actionsのファイル（ビルド、ユニットテスト）」が含まれます。ただし、"$ git init"は実行しません。
   
 # インストール方法
 ## Step.1 Golangのインストール
@@ -16,15 +16,19 @@ $ go install github.com/nao1215/ubume/cmd/ubume@latest
 以下の例では、ubumeコマンドはsampleプロジェクトを作成します。バイナリ名は"sample"で、ビルドにはMakefileを使います。
 ```
 $ ubume github.com/nao1215/sample  ※ 引数は"$ go mod init"と同じ。
-$ tree sample/
+$ tree -a sample/
 sample/
+├── .github
+│       └── workflows
+│                ├── build.yml
+│                └── unit_test.yml
 ├── Changelog.md
 ├── Makefile
 ├── cmd
 │      └── sample
-│              ├── doc.go
-│              ├── main.go
-│              └── main_test.go
+│               ├── doc.go
+│               ├── main.go
+│               └── main_test.go
 └── go.mod
 
 $ cd sample
@@ -48,8 +52,11 @@ go tool cover -html=cover.out -o cover.html
 ## ライブラリプロジェクトの作成
 ```
 $ ubume --library github.com/nao1215/sample
-$ tree sample/
+$ tree -a sample/
 sample/
+├── .github
+│       └── workflows
+│                └── unit_test.yml
 ├── Changelog.md
 ├── Makefile
 ├── doc.go

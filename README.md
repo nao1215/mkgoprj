@@ -16,15 +16,19 @@ $ go install github.com/nao1215/ubume/cmd/ubume@latest
 In the following example, the ubume command will generate a sample project. The binary name will be sample, and build using Makefile.
 ```
 $ ubume github.com/nao1215/sample  ※ Argument is same as "$ go mod init"
-$ tree sample/
+$ tree -a sample/
 sample/
+├── .github
+│       └── workflows
+│                ├── build.yml
+│                └── unit_test.yml
 ├── Changelog.md
 ├── Makefile
 ├── cmd
 │      └── sample
-│              ├── doc.go
-│              ├── main.go
-│              └── main_test.go
+│               ├── doc.go
+│               ├── main.go
+│               └── main_test.go
 └── go.mod
 
 $ cd sample
@@ -48,8 +52,11 @@ go tool cover -html=cover.out -o cover.html
 ## Generate library project
 ```
 $ ubume --library github.com/nao1215/sample
-$ tree sample/
+$ tree -a sample/
 sample/
+├── .github
+│       └── workflows
+│                └── unit_test.yml
 ├── Changelog.md
 ├── Makefile
 ├── doc.go
