@@ -37,7 +37,7 @@ type options struct {
 // osExit is funtion pointer that prepare a function pointer for unit testing
 var osExit = os.Exit
 
-const version string = "1.2.0"
+const version string = "1.2.1"
 
 // main is entry point of ubume command.
 func main() {
