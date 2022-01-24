@@ -2,10 +2,13 @@
 package project
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/fatih/color"
 	"github.com/nao1215/ubume/internal/gotool"
 	"github.com/nao1215/ubume/internal/ioutils"
 	"github.com/nao1215/ubume/internal/target"
@@ -37,15 +40,52 @@ func NewProject(importPath string, lib, noRoot bool) *Project {
 
 // Make generate project directory and files.
 func (p *Project) Make() {
+	now := time.Now()
+
+	p.printStartBanner()
 	p.canMake()
 	p.makeProjectDirs()
 	p.makeProjectFiles()
+	p.printDirTree()
 	p.goModInit()
+
+	ms := time.Since(now).Milliseconds()
+	p.printEndBanner(ms)
+}
+
+// printStartBanner displays a banner to start creating a project.
+func (p *Project) printStartBanner() {
+	kind := "application"
+	if p.library {
+		kind = "library"
+	}
+	fmt.Printf("%s starts creating the '%s' %s project (import path='%s')\n\n",
+		color.HiYellowString("ubume"), color.GreenString(p.name), kind,
+		color.GreenString(p.importPath))
+}
+
+// printEndBanner displays a banner to end creating a project.
+func (p *Project) printEndBanner(ms int64) {
+	fmt.Println("")
+	fmt.Printf("%s in %d[ms]\n", color.GreenString("BUILD SUCCESSFUL"), ms)
+}
+
+func (p *Project) printDirTree() {
+	projectDir := p.name
+	if p.noRoot {
+		projectDir = "."
+	}
+
+	fmt.Printf("        %s (your project root)\n", color.YellowString(projectDir))
+	ioutils.Tree(projectDir)
 }
 
 // canMake check whether can create project template or not.
 // If it can't create the project, exit command.
 func (p *Project) canMake() {
+	fmt.Printf("[%s] check if %s can create the project\n",
+		color.GreenString("START"), ioutils.CmdName)
+
 	gotool.CanUseGoCmd()
 	if strings.Trim(p.name, " ") == "" {
 		ioutils.Die("project name is empty (import path end with \"/ \"?)")
@@ -56,11 +96,13 @@ func (p *Project) canMake() {
 // makeProjectDirs create all directories in project template.
 // If it can not make directories, exit command.
 func (p *Project) makeProjectDirs() {
+	fmt.Printf("[%s] create directories\n", color.GreenString("START"))
 	ioutils.MkDirs(p.dirs)
 }
 
 // makeProjectDirs create all files in application project template.
 func (p *Project) makeProjectFiles() {
+	fmt.Printf("[%s] create files\n", color.GreenString("START"))
 	for path, code := range p.files {
 		ioutils.WriteFile(code, path)
 	}
@@ -76,7 +118,7 @@ func (p *Project) canMakePrjFile() {
 
 	for _, v := range files {
 		if ioutils.Exists(v) {
-			ioutils.Die("same name file (" + v + ") already exists at current directory")
+			ioutils.Die("same name file (" + v + ") already exists")
 		}
 	}
 }
@@ -84,6 +126,11 @@ func (p *Project) canMakePrjFile() {
 // goModInit execute "$ go mod init <importPath>"
 // If it can not execute "$ go mod", exit command.
 func (p *Project) goModInit() {
+	preDir, err := os.Getwd()
+	if err != nil {
+		ioutils.Die(err.Error())
+	}
+
 	if !p.noRoot {
 		err := os.Chdir(p.name)
 		if err != nil {
@@ -91,4 +138,9 @@ func (p *Project) goModInit() {
 		}
 	}
 	gotool.ModInit(p.importPath)
+
+	err = os.Chdir(preDir)
+	if err != nil {
+		ioutils.Die(err.Error())
+	}
 }

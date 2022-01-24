@@ -2,6 +2,7 @@
 [[日本語]](./doc/README.ja.md)
 # ubume - Golang project template generator
 ubume command generate golang project template at current directory. As of version 1.0.0, the ubume command can generate application and library projects. The automatically generated files include "Makefile for easy project management" and "GitHub Actions files (build, unit test)". However, it does not run "$ git init".
+![Screenshot](./doc/images/sample.png) 
   
 # How to install
 ## Step.1 Install golang
@@ -16,20 +17,25 @@ $ go install github.com/nao1215/ubume/cmd/ubume@latest
 In the following example, the ubume command will generate a sample project. The binary name will be sample, and build using Makefile.
 ```
 $ ubume github.com/nao1215/sample  ※ Argument is same as "$ go mod init"
-$ tree -a sample/
-sample/
-├── .github
-│       └── workflows
-│                ├── build.yml
-│                └── unit_test.yml
-├── Changelog.md
-├── Makefile
-├── cmd
-│      └── sample
-│               ├── doc.go
-│               ├── main.go
-│               └── main_test.go
-└── go.mod
+ubume starts creating the 'sample' application project (import path='github.com/nao1215/sample')
+
+[START] check if ubume can create the project
+[START] create directories
+[START] create files
+        sample (your project root)
+         ├─ Makefile
+         ├─ Changelog.md
+         ├─ cmd
+         │  └─ sample
+         │     ├─ main.go
+         │     ├─ main_test.go
+         │     └─ doc.go
+         └─ .github
+            └─ workflows
+               ├─ build.yml
+               └─ unit_test.yml
+
+BUILD SUCCESSFUL in 6[ms]
 
 $ cd sample
 $ make build
@@ -52,17 +58,22 @@ go tool cover -html=cover.out -o cover.html
 ## Generate library project
 ```
 $ ubume --library github.com/nao1215/sample
-$ tree -a sample/
-sample/
-├── .github
-│       └── workflows
-│                └── unit_test.yml
-├── Changelog.md
-├── Makefile
-├── doc.go
-├── go.mod
-├── sample.go
-└── sample_test.go
+ubume starts creating the 'sample' library project (import path='github.com/nao1215/sample')
+
+[START] check if ubume can create the project
+[START] create directories
+[START] create files
+        sample (your project root)
+         ├─ sample_test.go
+         ├─ Makefile
+         ├─ Changelog.md
+         ├─ doc.go
+         ├─ sample.go
+         └─ .github
+            └─ workflows
+               └─ unit_test.yml
+
+BUILD SUCCESSFUL in 6[ms]
 ```
 
 # Self-documented Makefile
