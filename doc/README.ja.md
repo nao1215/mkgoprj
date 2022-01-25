@@ -1,6 +1,12 @@
 [![Build](https://github.com/nao1215/ubume/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/nao1215/ubume/actions/workflows/build.yml)  
 # ubume - Golngプロジェクトテンプレートジェネレータ
-ubumeコマンドは、golangプロジェクトテンプレートをカレントディレクトリに作成します。Version 1.0.0では、アプリケーションプロジェクトとライブラリプロジェクトが作成できます。自動生成するファイルには、「プロジェクト管理を簡単にするMakefile」と「GitHub Actionsのファイル（ビルド、ユニットテスト）」が含まれます。ただし、"$ git init"は実行しません。
+ubumeコマンドは、golangプロジェクトテンプレートをカレントディレクトリに作成します。作成できるプロジェクトは、以下の３つです。
+- アプリケーションプロジェクト
+- ライブラリプロジェクト
+- [cobra](https://github.com/spf13/cobra)を用いたCLIプロジェクト
+
+自動生成するファイルには、「プロジェクト管理を簡単にするMakefile」と「GitHub Actionsのファイル（ビルド、ユニットテスト）」が含まれます。ただし、"$ git init"は実行しません。  
+  
 ![Screenshot](./images/sample.png) 
   
 # インストール方法

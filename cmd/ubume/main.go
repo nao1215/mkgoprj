@@ -29,6 +29,7 @@ import (
 
 // options is ubume command options.
 type options struct {
+	CLI     bool `short:"c" long:"cli" description:"Generate cli project with cobra (default: application project)"`
 	Libary  bool `short:"l" long:"library" description:"Generate library project template (default: application project)"`
 	NoRoot  bool `short:"n" long:"no-root" description:"Create files in the current directory without creating the project root directory"`
 	Version bool `short:"v" long:"version" description:"Show ubume command version"`
@@ -37,13 +38,13 @@ type options struct {
 // osExit is funtion pointer that prepare a function pointer for unit testing
 var osExit = os.Exit
 
-const version string = "1.2.1"
+const version string = "1.3.0"
 
 // main is entry point of ubume command.
 func main() {
 	var opts options
 	args := parseArgs(&opts)
-	prj := project.NewProject(args[0], opts.Libary, opts.NoRoot)
+	prj := project.NewProject(args[0], opts.Libary, opts.CLI, opts.NoRoot)
 	prj.Make()
 }
 
@@ -73,6 +74,11 @@ func parseArgs(opts *options) []string {
 	if len(args) != 1 {
 		showHelp(p)
 		showHelpFooter()
+		osExit(1)
+	}
+
+	if opts.CLI && opts.Libary {
+		ioutils.Die("can not specify --cli and --library at same time")
 		osExit(1)
 	}
 	return args
