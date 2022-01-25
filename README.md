@@ -1,7 +1,13 @@
 [![Build](https://github.com/nao1215/ubume/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/nao1215/ubume/actions/workflows/build.yml)  
 [[日本語]](./doc/README.ja.md)
 # ubume - Golang project template generator
-ubume command generate golang project template at current directory. As of version 1.0.0, the ubume command can generate application and library projects. The automatically generated files include "Makefile for easy project management" and "GitHub Actions files (build, unit test)". However, it does not run "$ git init".
+ubume command generate golang project template at current directory. The following three projects can be created.
+- Application project
+- Library project
+- Command Line Interface project with [cobra](https://github.com/spf13/cobra)
+
+The automatically generated files include "Makefile for easy project management" and "GitHub Actions files (build, unit test)". However, it does not run "$ git init".  
+  
 ![Screenshot](./doc/images/sample.png) 
   
 # How to install

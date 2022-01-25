@@ -25,6 +25,14 @@ func ModInit(importPath string) {
 	}
 }
 
+// ModTidy execute "$ go mod tidy"
+// If it can not execute "$ go mod", exit command.
+func ModTidy() {
+	if err := exec.Command("go", "mod", "tidy").Run(); err != nil {
+		ioutils.Die(err.Error())
+	}
+}
+
 // CanUseGoCmd check whether go command install in the system.
 // If not install, exit command.
 func CanUseGoCmd() {
