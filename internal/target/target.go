@@ -151,13 +151,13 @@ func HelloWorld() string {
 func mainTestFile(name string, libProject, noRoot bool) (string, string) {
 	code := `package XXX_PKG_XXX
 
-	import "testing"
+import "testing"
 	
-	func TestHelloWorld(t *testing.T) {
-		if HelloWorld() != "Hello, World" {
-			t.Errorf("HelloWorlf = %s, want \"Hello, World\"", HelloWorld())
-		}
+func TestHelloWorld(t *testing.T) {
+	if HelloWorld() != "Hello, World" {
+		t.Errorf("HelloWorlf = %s, want \"Hello, World\"", HelloWorld())
 	}
+}
 	`
 	var path string
 	if libProject {
