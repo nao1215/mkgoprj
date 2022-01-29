@@ -20,25 +20,29 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/jessevdk/go-flags"
+	"github.com/nao1215/ubume/internal/interactive"
 	"github.com/nao1215/ubume/internal/ioutils"
 	"github.com/nao1215/ubume/internal/project"
 )
 
 // options is ubume command options.
 type options struct {
-	CLI     bool `short:"c" long:"cli" description:"Generate cli project with cobra (default: application project)"`
-	Libary  bool `short:"l" long:"library" description:"Generate library project template (default: application project)"`
-	NoRoot  bool `short:"n" long:"no-root" description:"Create files in the current directory without creating the project root directory"`
-	Version bool `short:"v" long:"version" description:"Show ubume command version"`
+	CLI         bool `short:"c" long:"cli" description:"Generate cli project with cobra (default: application project)"`
+	Interactive bool `short:"i" long:"interactive" description:"Generate cli project with interactive mode"`
+	Libary      bool `short:"l" long:"library" description:"Generate library project template (default: application project)"`
+	NoRoot      bool `short:"n" long:"no-root" description:"Create files in the current directory without creating the project root directory"`
+	Version     bool `short:"v" long:"version" description:"Show ubume command version"`
 }
 
 // osExit is funtion pointer that prepare a function pointer for unit testing
 var osExit = os.Exit
 
-const version string = "1.3.0"
+const version string = "1.4.0"
 
 // main is entry point of ubume command.
 func main() {
@@ -69,6 +73,14 @@ func parseArgs(opts *options) []string {
 	if opts.Version {
 		showVersion(ioutils.CmdName, version)
 		osExit(0)
+	}
+
+	if opts.Interactive {
+		args, err := interact(opts)
+		if err != nil {
+			ioutils.Die(err.Error())
+		}
+		return args
 	}
 
 	if len(args) != 1 {
@@ -109,4 +121,34 @@ func newParser(opts *options) *flags.Parser {
 func showVersion(cmdName string, version string) {
 	description := cmdName + " version " + version + " (under Apache License verison 2.0)"
 	fmt.Fprintln(os.Stdout, description)
+}
+
+func interact(opts *options) ([]string, error) {
+	ip, err := interactive.ImportPath()
+	if err != nil {
+		return nil, err
+	}
+	projectName := filepath.Base(ip)
+
+	kind, err := interactive.ProjectKind()
+	if err != nil {
+		return nil, err
+	}
+
+	rootInfo, err := interactive.ProjectRootDir(projectName)
+	if err != nil {
+		return nil, err
+	}
+
+	if !interactive.FinalConfirm(ip, projectName, kind, rootInfo) {
+		fmt.Println("")
+		fmt.Println(ioutils.CmdName + ": Please try again:" + color.YellowString("'ubume --interactive'"))
+		os.Exit(0)
+	}
+
+	opts.CLI = interactive.IsCLI(kind)
+	opts.Libary = interactive.IsLibrary(kind)
+	opts.NoRoot = interactive.IsNoRoot(rootInfo)
+
+	return []string{ip}, nil
 }
