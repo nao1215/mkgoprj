@@ -234,6 +234,7 @@ GO_TOOL     = $(GO) tool
 GO_VET      = $(GO) vet
 GO_DEP      = $(GO) mod
 GOOS        = XXX_OS_XXX
+GOARCH      = XXX_ARCH_XXX
 GO_PKGROOT  = ./...
 GO_PACKAGES = $(shell $(GO_LIST) $(GO_PKGROOT))
 
@@ -256,7 +257,7 @@ help:
 `
 
 	strOnlyApp := `build:  ## Build binary
-	env GO111MODULE=on GOOS=$(GOOS) $(GO_BUILD) $(GO_LDFLAGS) -o $(APP) XXX_CODE_XXX
+	env GO111MODULE=on GOOS=$(GOOS) GOARCH=$(GOARCH) $(GO_BUILD) $(GO_LDFLAGS) -o $(APP) XXX_CODE_XXX
 
 clean: ## Clean project
 	-rm -rf $(APP) cover.out cover.html
@@ -273,6 +274,7 @@ clean: ## Clean project
 	}
 	code = strings.Replace(code, "XXX_APP_XXX", name, 1)
 	code = strings.Replace(code, "XXX_OS_XXX", runtime.GOOS, 1)
+	code = strings.Replace(code, "XXX_ARCH_XXX", runtime.GOARCH, 1)
 	return path, code
 }
 
