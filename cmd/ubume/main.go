@@ -119,7 +119,7 @@ func newParser(opts *options) *flags.Parser {
 
 // showVersion show ubume command version information.
 func showVersion(cmdName string, version string) {
-	description := cmdName + " version " + version + " (under Apache License verison 2.0)"
+	description := cmdName + " version " + version + " (under Apache License version 2.0)"
 	fmt.Fprintln(os.Stdout, description)
 }
 
