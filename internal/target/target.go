@@ -319,7 +319,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
-        go-version: XXX_VER_XXX
+        go-version: "XXX_VER_XXX"
 
     - name: Build
       run: make build
@@ -352,7 +352,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
-        go-version: 1.17
+        go-version: "XXX_VER_XXX"
 
     - name: UnitTest
       run: make test
