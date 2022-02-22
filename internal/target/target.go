@@ -28,8 +28,10 @@ func Dirs(name string, lib, cli, noRoot bool) []string {
 	} else if cli {
 		if noRoot {
 			dirs = append(dirs, "cmd")
+			dirs = append(dirs, filepath.Join("internal", "cmdinfo"))
 		} else {
 			dirs = append(dirs, filepath.Join(name, "cmd"))
+			dirs = append(dirs, filepath.Join(name, "internal", "cmdinfo"))
 		}
 	} else {
 		if noRoot {
@@ -66,7 +68,7 @@ func Files(name, importPath string, lib, cli, noRoot bool) map[string]string {
 		files[path] = code
 		path, code = versionFile(name, noRoot)
 		files[path] = code
-		path, code = versionTestFile(name, noRoot)
+		path, code = cmdInfoFile(name, noRoot)
 		files[path] = code
 	}
 
@@ -84,6 +86,9 @@ func Files(name, importPath string, lib, cli, noRoot bool) map[string]string {
 		files[path] = code
 	}
 	path, code = githubUnitTestYml(name, noRoot)
+	files[path] = code
+
+	path, code = githubReviewDog(name, noRoot)
 	files[path] = code
 
 	return files
@@ -361,6 +366,58 @@ jobs:
 	return path, data
 }
 
+func githubReviewDog(name string, noRoot bool) (string, string) {
+	var path string
+	if noRoot {
+		path = filepath.Join(".github", "workflows", "reviewdog.yml")
+	} else {
+		path = filepath.Join(name, ".github", "workflows", "reviewdog.yml")
+	}
+	data := `name: reviewdog
+on: [pull_request]
+
+jobs:
+  golangci-lint:
+    name: golangci-lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - name: golangci-lint
+        uses: reviewdog/action-golangci-lint@v2
+        with:
+          reporter: github-pr-review
+          level: warning
+
+  misspell:
+    name: misspell
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - name: misspell
+        uses: reviewdog/action-misspell@v1
+        with:
+          reporter: github-pr-review
+          level: warning
+          locale: "US"
+
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: reviewdog/action-actionlint@v1
+        with:
+          reporter: github-pr-review
+          level: warning
+`
+	return path, data
+}
+
 func rootFile(name string, noRoot bool) (string, string) {
 	var path string
 	if noRoot {
@@ -411,60 +468,56 @@ func versionFile(name string, noRoot bool) (string, string) {
 
 import (
 	"fmt"
-	"runtime"
 
+	"XXX_NAME_XXX/internal/cmdinfo"
 	"github.com/spf13/cobra"
 )
 
-var (
-	Revision = "dev"
-	Version  = "dev"
-)
-
-func getVersion() string {
-	return fmt.Sprintf("Version: %s Revision: %s OS: %sArch: %s", 
-						Version, Revision, runtime.GOOS, runtime.GOARCH)
-}
-
 var versionCmd = &cobra.Command{
-	Use: "version",
+	Use:   "version",
+	Short: "Show " + cmdinfo.Name() + " command version information",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(getVersion())
+		fmt.Println(cmdinfo.Version())
 	},
-	Short: "Show version info",
 }
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
 }
 `
+	data = strings.Replace(data, "XXX_NAME_XXX", name, 1)
 	return path, data
 }
 
-func versionTestFile(name string, noRoot bool) (string, string) {
+func cmdInfoFile(name string, noRoot bool) (string, string) {
 	var path string
 	if noRoot {
-		path = filepath.Join("cmd", "version_test.go")
+		path = filepath.Join("internal", "cmdinfo", "cmdinfo.go")
 	} else {
-		path = filepath.Join(name, "cmd", "version_test.go")
+		path = filepath.Join(name, "internal", "cmdinfo", "cmdinfo.go")
 	}
-	data := `package cmd
+	data := `package cmdinfo
 
 import (
 	"fmt"
-	"runtime"
-	"testing"
 )
 
-func TestGetVersion(t *testing.T) {
-	got := getVersion()
-	want := fmt.Sprintf("Version: %s Revision: %s OS: %sArch: %s",
-						Version, Revision, runtime.GOOS, runtime.GOARCH)
+const (
+	name    = "XXX_NAME_XXX"
+	version = "0.0.1"
+)
 
-	if want != got {
-		t.Fatalf("unexpected version info. want: %s, got: %s", want, got)
-	}
+// Version return command version.
+func Version() string {
+	return fmt.Sprintf("%s version %s (under Apache License version 2.0)",
+		Name(), version)
+}
+
+// Name return command name.
+func Name() string {
+	return name
 }
 `
+	data = strings.Replace(data, "XXX_NAME_XXX", name, 1)
 	return path, data
 }
