@@ -84,6 +84,10 @@ func Files(name, importPath string, lib, cli, noRoot bool) map[string]string {
 	if !lib {
 		path, code = githubBuildYml(name, noRoot)
 		files[path] = code
+		path, code = githubRelease(name, noRoot)
+		files[path] = code
+		path, code = goreleaser(name, noRoot, cli)
+		files[path] = code
 	}
 	path, code = githubUnitTestYml(name, noRoot)
 	files[path] = code
@@ -414,6 +418,100 @@ jobs:
           reporter: github-pr-review
           level: warning
 `
+	return path, data
+}
+
+func githubRelease(name string, noRoot bool) (string, string) {
+	var path string
+	if noRoot {
+		path = filepath.Join(".github", "workflows", "release.yml")
+	} else {
+		path = filepath.Join(name, ".github", "workflows", "release.yml")
+	}
+	data := `name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          - name: Setup Go
+            uses: actions/setup-go@v2
+            with:
+              go-version: "XXX_VER_XXX"
+          - name: Run GoReleaser
+            uses: goreleaser/goreleaser-action@v2
+            with:
+              version: latest
+              args: release --rm-dist
+            env:
+              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+`
+	data = strings.Replace(data, "XXX_VER_XXX", gotool.Version(), 1)
+	return path, data
+}
+
+func goreleaser(name string, noRoot, cli bool) (string, string) {
+	var path string
+	if noRoot {
+		path = filepath.Join(".goreleaser.yml")
+	} else {
+		path = filepath.Join(name, ".goreleaser.yml")
+	}
+	data := `project_name: XXX_APP_NAME_XXX
+env:
+  - GO111MODULE=on
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+builds:
+  - main: XXX_BUILD_TARGET_XXX
+    ldflags:
+      - -s -w
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    archives:
+      - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+        replacements:
+          darwin: Darwin
+          linux: Linux
+          windows: Windows
+          386: i386
+          amd64: x86_64
+        format_overrides:
+          - goos: windows
+            format: zip
+    checksum:
+      name_template: "checksums.txt"
+    snapshot:
+      name_template: "{{ incpatch .Version }}-next"
+    changelog:
+      sort: asc
+      filters:
+        exclude:
+          - "^docs:"
+          - "^test:"	
+`
+	data = strings.Replace(data, "XXX_APP_NAME_XXX", name, 1)
+	if cli {
+		data = strings.Replace(data, "XXX_BUILD_TARGET_XXX", "./cmd/"+name, 1)
+	} else {
+		data = strings.Replace(data, "XXX_BUILD_TARGET_XXX", ".", 1)
+	}
 	return path, data
 }
 

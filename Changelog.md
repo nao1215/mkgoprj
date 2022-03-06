@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.  
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+# [1.4.3] - 2022-03-06
+## Added
+- Added goreleaser setting for ubume.
+- For CLI command projects, added the function to generate files related to goreleaser
+## Changed
+- Changed to be able to make clean even for library projects.
 # [1.4.2] - 2022-02-22
 ## Added
 - Added reviewdog.yml in .github/workflow
