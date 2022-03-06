@@ -6,6 +6,3 @@ updates:
       interval: daily
       time: "20:00"
     open-pull-requests-limit: 10
-    automerged_updates:
-      - match:
-        update_type: "semver:minor"
