@@ -245,6 +245,9 @@ GO_PACKAGES = $(shell $(GO_LIST) $(GO_PKGROOT))
 
 XXX_ONLY_APP_XXX
 
+clean: ## Clean project
+	-rm -rf $(APP) cover.out cover.html
+
 test: ## Start test
 	env GOOS=$(GOOS) $(GO_TEST) -cover $(GO_PKGROOT) -coverprofile=cover.out
 	$(GO_TOOL) cover -html=cover.out -o cover.html
@@ -262,11 +265,7 @@ help:
 `
 
 	strOnlyApp := `build:  ## Build binary
-	env GO111MODULE=on GOOS=$(GOOS) GOARCH=$(GOARCH) $(GO_BUILD) $(GO_LDFLAGS) -o $(APP) XXX_CODE_XXX
-
-clean: ## Clean project
-	-rm -rf $(APP) cover.out cover.html
-`
+	env GO111MODULE=on GOOS=$(GOOS) GOARCH=$(GOARCH) $(GO_BUILD) $(GO_LDFLAGS) -o $(APP) XXX_CODE_XXX`
 
 	if libProject {
 		code = strings.Replace(code, "XXX_ONLY_APP_XXX", "", 1)
