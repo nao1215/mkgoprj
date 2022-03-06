@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # [1.5.0] - 2022-03-06
 ## Added
 - Added goreleaser setting for ubume.
+- Added issue template for ubume.
 - For CLI command projects, added the function to generate files related to goreleaser
 - Added function to generate code of conduct file
 - Added function to generate dependabot.yml
