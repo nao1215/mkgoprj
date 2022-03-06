@@ -1,4 +1,6 @@
-[![Build](https://github.com/nao1215/ubume/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/nao1215/ubume/actions/workflows/build.yml)  
+[![Build](https://github.com/nao1215/ubume/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/nao1215/ubume/actions/workflows/build.yml)
+[![reviewdog](https://github.com/nao1215/ubume/actions/workflows/review_dog.yml/badge.svg)](https://github.com/nao1215/ubume/actions/workflows/review_dog.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/nao1215/ubume)](https://goreportcard.com/report/github.com/nao1215/ubume)   
 [[日本語]](./doc/README.ja.md)
 # ubume - Golang project template generator
 ubume command generate golang project template at current directory. The following three projects can be created.
