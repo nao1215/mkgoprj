@@ -98,6 +98,9 @@ func Files(name, importPath string, lib, cli, noRoot bool) map[string]string {
 	path, code = codeOfConduct(name, noRoot)
 	files[path] = code
 
+	path, code = dependabot(name, noRoot)
+	files[path] = code
+
 	return files
 }
 
@@ -756,6 +759,29 @@ enforcement ladder](https://github.com/mozilla/diversity).
 For answers to common questions about this code of conduct, see the FAQ at
 https://www.contributor-covenant.org/faq. Translations are available at
 https://www.contributor-covenant.org/translations.
+`
+	return path, data
+}
+
+func dependabot(name string, noRoot bool) (string, string) {
+	var path string
+	if noRoot {
+		path = filepath.Join(".github", "dependabot.yml")
+	} else {
+		path = filepath.Join(name, ".github", "dependabot.yml")
+	}
+	data := `version: 2
+updates:
+  - package-ecosystem: gomod
+    directory: "/"
+    schedule:
+      interval: daily
+      time: "20:00"
+    open-pull-requests-limit: 10
+    automerged_updates:
+      - match:
+          dependency_type: all
+          update_type: semver:minor
 `
 	return path, data
 }
