@@ -17,8 +17,10 @@ func Dirs(name string, lib, cli, noRoot bool) []string {
 	dirs := []string{}
 	if noRoot {
 		dirs = append(dirs, filepath.Join(".github", "workflows"))
+		dirs = append(dirs, filepath.Join(".github", "ISSUE_TEMPLATE"))
 	} else {
 		dirs = append(dirs, filepath.Join(name, ".github", "workflows"))
+		dirs = append(dirs, filepath.Join(name, ".github", "ISSUE_TEMPLATE"))
 	}
 
 	if lib {
@@ -99,6 +101,12 @@ func Files(name, importPath string, lib, cli, noRoot bool) map[string]string {
 	files[path] = code
 
 	path, code = dependabot(name, noRoot)
+	files[path] = code
+
+	path, code = bugReportTemplate(name, noRoot)
+	files[path] = code
+
+	path, code = issueTemplate(name, noRoot)
 	files[path] = code
 
 	return files
@@ -782,6 +790,83 @@ updates:
       - match:
           dependency_type: all
           update_type: semver:minor
+`
+	return path, data
+}
+
+func bugReportTemplate(name string, noRoot bool) (string, string) {
+	var path string
+	if noRoot {
+		path = filepath.Join(".github", "ISSUE_TEMPLATE", "bug_report.md")
+	} else {
+		path = filepath.Join(name, ".github", "ISSUE_TEMPLATE", "bug_report.md")
+	}
+	data := `---
+name: Bug report
+about: Create a report to help us improve
+title: "[BUG] XXX"
+labels: bug
+assignees: ''
+
+---
+
+**Describe the bug**
+A clear and concise description of what the bug is.
+
+**To Reproduce**
+Steps to reproduce the behavior:
+1. Go to '...'
+2. Click on '....'
+3. Scroll down to '....'
+4. See error
+
+**Expected behavior**
+A clear and concise description of what you expected to happen.
+
+**Screenshots**
+If applicable, add screenshots to help explain your problem.
+
+**Desktop (please complete the following information):**
+ - OS: [e.g. Ubuntu]
+ - Go Version [e.g. 1.17]
+ - Application Version [e.g. 1.0.1]
+
+**Additional context**
+Add any other context about the problem here.
+`
+	return path, data
+}
+
+func issueTemplate(name string, noRoot bool) (string, string) {
+	var path string
+	if noRoot {
+		path = filepath.Join(".github", "ISSUE_TEMPLATE", "issue.md")
+	} else {
+		path = filepath.Join(name, ".github", "ISSUE_TEMPLATE", "issue.md")
+	}
+	data := `---
+name: Task
+about: Describe this issue
+title: ''
+labels: ''
+assignees: ''
+
+---
+
+## What
+
+Describe what this issue should address.
+
+## How
+
+Describe how to address the issue.
+
+## Checklist
+
+- [ ] Finish implementation of the issue
+- [ ] Test all functions
+- [ ] Have enough logs to trace activities
+- [ ] Notify developers of necessary actions
 `
 	return path, data
 }

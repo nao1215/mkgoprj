@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - For CLI command projects, added the function to generate files related to goreleaser
 - Added function to generate code of conduct file
 - Added function to generate dependabot.yml
+- Added function to generate GitHub issue template files
 ## Changed
 - Changed to be able to make clean even for library projects.
 # [1.4.2] - 2022-02-22
