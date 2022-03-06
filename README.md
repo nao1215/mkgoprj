@@ -6,7 +6,7 @@ ubume command generate golang project template at current directory. The followi
 - Library project
 - Command Line Interface project with [cobra](https://github.com/spf13/cobra)
 
-The automatically generated files include "Makefile for easy project management" and "GitHub Actions files (build, unit test)". However, it does not run "$ git init".  
+The automatically generated files include "Makefile for easy project management" and "GitHub Actions files (build, unit test, review-dog, goreleaser, dependabot)". However, it does not run "$ git init".  
   
 ![Screenshot](./doc/images/sample.png) 
   
@@ -29,17 +29,26 @@ ubume starts creating the 'sample' application project (import path='github.com/
 [START] create directories
 [START] create files
         sample (your project root)
+         ├─ CODE_OF_CONDUCT.md
          ├─ Makefile
          ├─ Changelog.md
+         ├─ .goreleaser.yml
          ├─ cmd
          │  └─ sample
          │     ├─ main.go
          │     ├─ main_test.go
          │     └─ doc.go
          └─ .github
+            ├─ dependabot.yml
+            ├─ ISSUE_TEMPLATE
+            │  ├─ issue.md
+            │  └─ bug_report.md
             └─ workflows
+               ├─ reviewdog.yml
                ├─ build.yml
-               └─ unit_test.yml
+               ├─ unit_test.yml
+               └─ release.yml
+[START] Execute 'go mod init github.com/nao1215/sample'
 
 BUILD SUCCESSFUL in 6[ms]
 
@@ -71,15 +80,22 @@ ubume starts creating the 'sample' library project (import path='github.com/nao1
 [START] create files
         sample (your project root)
          ├─ sample_test.go
+         ├─ CODE_OF_CONDUCT.md
          ├─ Makefile
          ├─ Changelog.md
          ├─ doc.go
          ├─ sample.go
          └─ .github
+            ├─ dependabot.yml
+            ├─ ISSUE_TEMPLATE
+            │  ├─ issue.md
+            │  └─ bug_report.md
             └─ workflows
+               ├─ reviewdog.yml
                └─ unit_test.yml
+[START] Execute 'go mod init github.com/nao1215/sample'
 
-BUILD SUCCESSFUL in 6[ms]
+BUILD SUCCESSFUL in 3[ms]
 ```
 
 # Self-documented Makefile

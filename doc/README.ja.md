@@ -5,7 +5,7 @@ ubumeコマンドは、golangプロジェクトテンプレートをカレント
 - ライブラリプロジェクト
 - [cobra](https://github.com/spf13/cobra)を用いたCLIプロジェクト
 
-自動生成するファイルには、「プロジェクト管理を簡単にするMakefile」と「GitHub Actionsのファイル（ビルド、ユニットテスト）」が含まれます。ただし、"$ git init"は実行しません。  
+自動生成するファイルには、「プロジェクト管理を簡単にするMakefile」と「GitHub Actionsのファイル（ビルド、ユニットテスト、リリース、レビュードッグ、dependabot）」が含まれます。ただし、"$ git init"は実行しません。  
   
 ![Screenshot](./images/sample.png) 
   
@@ -29,17 +29,26 @@ ubume starts creating the 'sample' application project (import path='github.com/
 [START] create directories
 [START] create files
         sample (your project root)
+         ├─ CODE_OF_CONDUCT.md
          ├─ Makefile
          ├─ Changelog.md
+         ├─ .goreleaser.yml
          ├─ cmd
          │  └─ sample
          │     ├─ main.go
          │     ├─ main_test.go
          │     └─ doc.go
          └─ .github
+            ├─ dependabot.yml
+            ├─ ISSUE_TEMPLATE
+            │  ├─ issue.md
+            │  └─ bug_report.md
             └─ workflows
+               ├─ reviewdog.yml
                ├─ build.yml
-               └─ unit_test.yml
+               ├─ unit_test.yml
+               └─ release.yml
+[START] Execute 'go mod init github.com/nao1215/sample'
 
 BUILD SUCCESSFUL in 6[ms]
 
@@ -71,15 +80,22 @@ ubume starts creating the 'sample' library project (import path='github.com/nao1
 [START] create files
         sample (your project root)
          ├─ sample_test.go
+         ├─ CODE_OF_CONDUCT.md
          ├─ Makefile
          ├─ Changelog.md
          ├─ doc.go
          ├─ sample.go
          └─ .github
+            ├─ dependabot.yml
+            ├─ ISSUE_TEMPLATE
+            │  ├─ issue.md
+            │  └─ bug_report.md
             └─ workflows
+               ├─ reviewdog.yml
                └─ unit_test.yml
+[START] Execute 'go mod init github.com/nao1215/sample'
 
-BUILD SUCCESSFUL in 6[ms]
+BUILD SUCCESSFUL in 3[ms]
 ```
 
 # 自己文書化されたMakefile
