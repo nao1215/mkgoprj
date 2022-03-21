@@ -458,17 +458,17 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          - name: Setup Go
-            uses: actions/setup-go@v2
-            with:
-              go-version: "XXX_VER_XXX"
-          - name: Run GoReleaser
-            uses: goreleaser/goreleaser-action@v2
-            with:
-              version: latest
-              args: release --rm-dist
-            env:
-              GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: "XXX_VER_XXX"
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: release --rm-dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 `
 	data = strings.Replace(data, "XXX_VER_XXX", gotool.Version(), 1)
 	return path, data
