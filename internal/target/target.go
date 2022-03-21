@@ -68,7 +68,7 @@ func Files(name, importPath string, lib, cli, noRoot bool) map[string]string {
 	if cli {
 		path, code := rootFile(name, noRoot)
 		files[path] = code
-		path, code = versionFile(name, noRoot)
+		path, code = versionFile(name, importPath, noRoot)
 		files[path] = code
 		path, code = cmdInfoFile(name, noRoot)
 		files[path] = code
@@ -568,7 +568,7 @@ func Execute() {
 	return path, data
 }
 
-func versionFile(name string, noRoot bool) (string, string) {
+func versionFile(name, importPath string, noRoot bool) (string, string) {
 	var path string
 	if noRoot {
 		path = filepath.Join("cmd", "version.go")
@@ -580,7 +580,7 @@ func versionFile(name string, noRoot bool) (string, string) {
 import (
 	"fmt"
 
-	"XXX_NAME_XXX/internal/cmdinfo"
+	"XXX_PATH_XXX/internal/cmdinfo"
 	"github.com/spf13/cobra"
 )
 
@@ -596,7 +596,7 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 }
 `
-	data = strings.Replace(data, "XXX_NAME_XXX", name, 1)
+	data = strings.Replace(data, "XXX_PATH_XXX", importPath, 1)
 	return path, data
 }
 
