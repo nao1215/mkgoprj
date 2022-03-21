@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## Changed
 - Fixed a bug that could not be built in CLI command project
 - Fixed a mistake in the goreleaser settings. There was a mistake in the hierarchy where main.go exists
-- Fixed indent in release.yml
+- Fixed indent in release.yml and .goreleaser.yml
 # [1.5.0] - 2022-03-06
 ## Added
 - Added goreleaser setting for ubume.
