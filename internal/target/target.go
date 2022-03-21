@@ -554,6 +554,7 @@ func exitError(msg interface{}) {
 	os.Exit(1)
 }
 
+// Execute start command.
 func Execute() {
 	rootCmd.Run = func(cmd *cobra.Command, args []string) {
 		_ = rootCmd.Help()
