@@ -2,10 +2,11 @@
 All notable changes to this project will be documented in this file.  
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# [1.5.3] - 2022-03-21
+# [1.5.4] - 2022-03-21
 ## Changed
 - Fixed a bug that could not be built in CLI command project
 - Fixed a mistake in the goreleaser settings. There was a mistake in the hierarchy where main.go exists
+- Fixed indent in release.yml
 # [1.5.0] - 2022-03-06
 ## Added
 - Added goreleaser setting for ubume.
