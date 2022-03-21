@@ -522,9 +522,9 @@ builds:
 `
 	data = strings.Replace(data, "XXX_APP_NAME_XXX", name, 1)
 	if cli {
-		data = strings.Replace(data, "XXX_BUILD_TARGET_XXX", "./cmd/"+name, 1)
-	} else {
 		data = strings.Replace(data, "XXX_BUILD_TARGET_XXX", ".", 1)
+	} else {
+		data = strings.Replace(data, "XXX_BUILD_TARGET_XXX", "./cmd/"+name, 1)
 	}
 	return path, data
 }
