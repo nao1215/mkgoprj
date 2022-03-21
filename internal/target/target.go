@@ -498,27 +498,27 @@ builds:
       - linux
       - windows
       - darwin
-    archives:
-      - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-        replacements:
-          darwin: Darwin
-          linux: Linux
-          windows: Windows
-          386: i386
-          amd64: x86_64
-        format_overrides:
-          - goos: windows
-            format: zip
-    checksum:
-      name_template: "checksums.txt"
-    snapshot:
-      name_template: "{{ incpatch .Version }}-next"
-    changelog:
-      sort: asc
-      filters:
-        exclude:
-          - "^docs:"
-          - "^test:"	
+archives:
+  - name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: i386
+      amd64: x86_64
+    format_overrides:
+      - goos: windows
+        format: zip
+checksum:
+  name_template: "checksums.txt"
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"	
 `
 	data = strings.Replace(data, "XXX_APP_NAME_XXX", name, 1)
 	if cli {
