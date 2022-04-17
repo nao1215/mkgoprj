@@ -13,7 +13,7 @@ The automatically generated files include "Makefile for easy project management"
 ![Screenshot](./doc/images/sample.png) 
   
 # How to install
-## Step.1 Install golang
+## Step1. Install golang
 If you don't install golang in your system, please install Golang first. Check the [Go official website](https://go.dev/doc/install) for how to install golang.
 ## Step2. Install ubume
 ```
