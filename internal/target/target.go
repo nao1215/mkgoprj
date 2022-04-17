@@ -11,7 +11,7 @@ import (
 
 // Dirs returns the directory to be created.
 // name   : Project name
-// libP   : Whether to create library project
+// lib    : Whether to create library project
 // noRoot : Whether to create the project root directory (project name directory)
 func Dirs(name string, lib, cli, noRoot bool) []string {
 	dirs := []string{}
@@ -35,12 +35,6 @@ func Dirs(name string, lib, cli, noRoot bool) []string {
 			dirs = append(dirs, filepath.Join(name, "cmd"))
 			dirs = append(dirs, filepath.Join(name, "internal", "cmdinfo"))
 		}
-	} else {
-		if noRoot {
-			dirs = append(dirs, filepath.Join("cmd", name))
-		} else {
-			dirs = append(dirs, filepath.Join(name, "cmd", name))
-		}
 	}
 	return dirs
 }
@@ -54,9 +48,6 @@ func Files(name, importPath string, lib, cli, noRoot bool) map[string]string {
 		files[path] = code
 	} else if cli {
 		path, code := cliMainSourceCodeFile(name, importPath, noRoot)
-		files[path] = code
-	} else {
-		path, code := applicationMainSourceCodeFile(name, noRoot)
 		files[path] = code
 	}
 
@@ -110,29 +101,6 @@ func Files(name, importPath string, lib, cli, noRoot bool) map[string]string {
 	files[path] = code
 
 	return files
-}
-
-func applicationMainSourceCodeFile(name string, noRoot bool) (string, string) {
-	var path string
-	if noRoot {
-		path = filepath.Join("cmd", name, "main.go")
-	} else {
-		path = filepath.Join(name, "cmd", name, "main.go")
-	}
-
-	code := `package main
-
-import "fmt"
-
-func main() {
-	fmt.Println(HelloWorld())
-}
-
-func HelloWorld() string {
-	return "Hello, World"
-}
-`
-	return path, code
 }
 
 func cliMainSourceCodeFile(name, importPath string, noRoot bool) (string, string) {
