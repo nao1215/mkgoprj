@@ -16,7 +16,7 @@ The automatically generated files include "Makefile for easy project management"
 If you don't install golang in your system, please install Golang first. Check the [Go official website](https://go.dev/doc/install) for how to install golang.
 ## Step2. Install mkgoprj
 ```
-$ go install github.com/nao1215/mkgoprj/cmd/mkgoprj@latest
+$ go install github.com/nao1215/mkgoprj@latest
 ```
   
 # How to use
