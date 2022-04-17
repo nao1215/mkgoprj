@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"runtime"
 
-	"github.com/nao1215/ubume/internal/ioutils"
+	"github.com/nao1215/mkgoprj/internal/ioutils"
 )
 
 // Version return runtime golang version(only number, not include "go" or "cpu name")

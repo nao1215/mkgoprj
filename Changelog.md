@@ -4,7 +4,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # [2.0.0] - 2022-04-19
 ## Changed
-- Rename project name from ubume to mkgoprj
+- Rename project name from mkgoprj to mkgoprj
 - Interactive mode and Simple Application mode eliminated.
 - Introduced cobra library and enabled shell completion.
 # [1.5.4] - 2022-03-21
@@ -14,8 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed indent in release.yml and .goreleaser.yml
 # [1.5.0] - 2022-03-06
 ## Added
-- Added goreleaser setting for ubume.
-- Added issue template for ubume.
+- Added goreleaser setting for mkgoprj.
+- Added issue template for mkgoprj.
 - For CLI command projects, added the function to generate files related to goreleaser
 - Added function to generate code of conduct file
 - Added function to generate dependabot.yml

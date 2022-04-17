@@ -1,4 +1,4 @@
-module github.com/nao1215/ubume
+module github.com/nao1215/mkgoprj
 
 go 1.18
 

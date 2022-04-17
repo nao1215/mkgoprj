@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nao1215/ubume/internal/completion"
+	"github.com/nao1215/mkgoprj/internal/completion"
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "ubume",
-	Short: `ubume make go project for command line application or library`,
+	Use:   "mkgoprj",
+	Short: `mkgoprj make go project for command line application or library`,
 }
 
 func exitError(msg interface{}) {

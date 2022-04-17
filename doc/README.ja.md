@@ -1,6 +1,6 @@
-[![Build](https://github.com/nao1215/ubume/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/nao1215/ubume/actions/workflows/build.yml)  
-# ubume - Golngプロジェクトテンプレートジェネレータ
-ubumeコマンドは、golangプロジェクトテンプレートをカレントディレクトリに作成します。作成できるプロジェクトは、以下の３つです。
+[![Build](https://github.com/nao1215/mkgoprj/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/nao1215/mkgoprj/actions/workflows/build.yml)  
+# mkgoprj - Golngプロジェクトテンプレートジェネレータ
+mkgoprjコマンドは、golangプロジェクトテンプレートをカレントディレクトリに作成します。作成できるプロジェクトは、以下の３つです。
 - アプリケーションプロジェクト
 - ライブラリプロジェクト
 - [cobra](https://github.com/spf13/cobra)を用いたCLIプロジェクト
@@ -13,19 +13,19 @@ ubumeコマンドは、golangプロジェクトテンプレートをカレント
 ## Step.1 Golangのインストール
 Golangをシステムにインストールしていない場合は、まずはgolangをインストールしてください。インストール方法は、[Go公式サイト](https://go.dev/doc/install) で確認してください。  
   
-## Step2. ubumeのインストール
+## Step2. mkgoprjのインストール
 ```
-$ go install github.com/nao1215/ubume/cmd/ubume@latest
+$ go install github.com/nao1215/mkgoprj/cmd/mkgoprj@latest
 ```
   
 # 使い方
 ## アプリケーションプロジェクトの作成
-以下の例では、ubumeコマンドはsampleプロジェクトを作成します。バイナリ名は"sample"で、ビルドにはMakefileを使います。
+以下の例では、mkgoprjコマンドはsampleプロジェクトを作成します。バイナリ名は"sample"で、ビルドにはMakefileを使います。
 ```
-$ ubume github.com/nao1215/sample  ※ 引数は"$ go mod init"と同じ。
-ubume starts creating the 'sample' application project (import path='github.com/nao1215/sample')
+$ mkgoprj github.com/nao1215/sample  ※ 引数は"$ go mod init"と同じ。
+mkgoprj starts creating the 'sample' application project (import path='github.com/nao1215/sample')
 
-[START] check if ubume can create the project
+[START] check if mkgoprj can create the project
 [START] create directories
 [START] create files
         sample (your project root)
@@ -72,10 +72,10 @@ go tool cover -html=cover.out -o cover.html
 
 ## ライブラリプロジェクトの作成
 ```
-$ ubume --library github.com/nao1215/sample
-ubume starts creating the 'sample' library project (import path='github.com/nao1215/sample')
+$ mkgoprj --library github.com/nao1215/sample
+mkgoprj starts creating the 'sample' library project (import path='github.com/nao1215/sample')
 
-[START] check if ubume can create the project
+[START] check if mkgoprj can create the project
 [START] create directories
 [START] create files
         sample (your project root)
@@ -99,7 +99,7 @@ BUILD SUCCESSFUL in 3[ms]
 ```
 
 # 自己文書化されたMakefile
-ubumeコマンドによって生成されるMakefileは、[自己文書化](https://postd.cc/auto-documented-makefile/)されています。makeコマンドを実行した時、Makefileのターゲットリストが表示されます。ターゲット名の横には、ヘルプメッセージが表示されます。
+mkgoprjコマンドによって生成されるMakefileは、[自己文書化](https://postd.cc/auto-documented-makefile/)されています。makeコマンドを実行した時、Makefileのターゲットリストが表示されます。ターゲット名の横には、ヘルプメッセージが表示されます。
 
 ```
 $ make
@@ -120,7 +120,7 @@ clean: ## Clean project
 # 連絡先
 「バグを見つけた場合」や「機能追加要望」に関するコメントを開発者に送りたい場合は、以下の連絡先を使用してください。
 
-- [GitHub Issue](https://github.com/nao1215/ubume/issues)
+- [GitHub Issue](https://github.com/nao1215/mkgoprj/issues)
 
 # ライセンス
-ubumeプロジェクトは、[Apache License 2.0](./LICENSE)条文の下でライセンスされています。
+mkgoprjプロジェクトは、[Apache License 2.0](./LICENSE)条文の下でライセンスされています。

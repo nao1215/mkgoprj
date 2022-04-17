@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/nao1215/ubume/internal/cmdinfo"
-	"github.com/nao1215/ubume/internal/ioutils"
-	"github.com/nao1215/ubume/internal/print"
+	"github.com/nao1215/mkgoprj/internal/cmdinfo"
+	"github.com/nao1215/mkgoprj/internal/ioutils"
+	"github.com/nao1215/mkgoprj/internal/print"
 	"github.com/spf13/cobra"
 )
 

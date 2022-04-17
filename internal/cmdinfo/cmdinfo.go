@@ -5,11 +5,11 @@ import (
 )
 
 const (
-	name    = "ubume"
+	name    = "mkgoprj"
 	version = "2.0.0"
 )
 
-// Version return ubume command version.
+// Version return mkgoprj command version.
 func Version() string {
 	return fmt.Sprintf("%s version %s (under Apache License version 2.0)",
 		Name(), version)

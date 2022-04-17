@@ -18,7 +18,7 @@ var (
 )
 
 // CmdName is this command name.
-const CmdName string = "ubume"
+const CmdName string = "mkgoprj"
 
 // Exists check whether file or directory exists.
 func Exists(path string) bool {

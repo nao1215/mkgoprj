@@ -7,7 +7,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/mattn/go-colorable"
-	"github.com/nao1215/ubume/internal/cmdinfo"
+	"github.com/nao1215/mkgoprj/internal/cmdinfo"
 )
 
 var (

@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/nao1215/ubume/internal/gotool"
-	"github.com/nao1215/ubume/internal/ioutils"
-	"github.com/nao1215/ubume/internal/target"
+	"github.com/nao1215/mkgoprj/internal/gotool"
+	"github.com/nao1215/mkgoprj/internal/ioutils"
+	"github.com/nao1215/mkgoprj/internal/target"
 )
 
 type Option struct {
@@ -66,7 +66,7 @@ func (p *Project) printStartBanner() {
 		kind = "library"
 	}
 	fmt.Printf("%s starts creating the '%s' %s project (import path='%s')\n\n",
-		color.HiYellowString("ubume"), color.GreenString(p.name), kind,
+		color.HiYellowString("mkgoprj"), color.GreenString(p.name), kind,
 		color.GreenString(p.importPath))
 }
 
@@ -114,7 +114,7 @@ func (p *Project) makeProjectFiles() {
 	}
 }
 
-// canMakePrjFile check whether the file ubume is trying to generate already exists.
+// canMakePrjFile check whether the file mkgoprj is trying to generate already exists.
 func (p *Project) canMakePrjFile() {
 	var files []string
 	for k := range p.files {

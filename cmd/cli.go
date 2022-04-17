@@ -3,8 +3,8 @@ package cmd
 import (
 	"os"
 
-	"github.com/nao1215/ubume/internal/ioutils"
-	"github.com/nao1215/ubume/internal/project"
+	"github.com/nao1215/mkgoprj/internal/ioutils"
+	"github.com/nao1215/mkgoprj/internal/project"
 	"github.com/spf13/cobra"
 )
 

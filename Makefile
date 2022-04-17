@@ -1,6 +1,6 @@
 .PHONY: build test clean static_analysis lint vet fmt chkfmt
 
-APP         = ubume
+APP         = mkgoprj
 GO          = go
 GO_BUILD    = $(GO) build
 GO_FORMAT   = $(GO) fmt

@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/nao1215/ubume/internal/cmdinfo"
+	"github.com/nao1215/mkgoprj/internal/cmdinfo"
 	"github.com/spf13/cobra"
 )
 
