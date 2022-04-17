@@ -15,7 +15,7 @@ GO_PKGROOT  = ./...
 GO_PACKAGES = $(shell $(GO_LIST) $(GO_PKGROOT))
 
 build:  ## Build binary 
-	env GO111MODULE=on GOOS=$(GOOS) $(GO_BUILD) $(GO_LDFLAGS) -o $(APP) cmd/ubume/main.go
+	env GO111MODULE=on GOOS=$(GOOS) $(GO_BUILD) $(GO_LDFLAGS) -o $(APP) main.go
 
 clean: ## Clean project
 	-rm -rf $(APP)

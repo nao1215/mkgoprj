@@ -14,6 +14,9 @@ import (
 	"github.com/nao1215/ubume/internal/target"
 )
 
+type Option struct {
+}
+
 // Project have project information to be generated.
 type Project struct {
 	importPath string            // same as "$ git mod init <importPath>"

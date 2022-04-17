@@ -7,6 +7,14 @@ import (
 	"path/filepath"
 
 	"github.com/fatih/color"
+	"github.com/mattn/go-colorable"
+)
+
+var (
+	// Stdout is new instance of Writer which handles escape sequence for stdout.
+	Stdout = colorable.NewColorableStdout()
+	// Stderr is new instance of Writer which handles escape sequence for stderr.
+	Stderr = colorable.NewColorableStderr()
 )
 
 // CmdName is this command name.
@@ -42,9 +50,15 @@ func MkDirs(paths []string) {
 	}
 }
 
+// Warn print warning message
+func Warn(msg string) {
+	fmt.Fprintf(Stderr, "[%s] %s: %s\n", color.YellowString("WARN "), CmdName, msg)
+	os.Exit(1)
+}
+
 // Die exit program with message.
 func Die(msg string) {
-	fmt.Fprintf(os.Stderr, "[%s] %s: %s\n", color.RedString("ERROR"), CmdName, msg)
+	fmt.Fprintf(Stderr, "[%s] %s: %s\n", color.RedString("ERROR"), CmdName, msg)
 	os.Exit(1)
 }
 
@@ -107,4 +121,10 @@ func readDirs(name string) ([]string, []string, error) {
 		}
 	}
 	return dirs, files, nil
+}
+
+// IsFile reports whether the path exists and is a file.
+func IsFile(path string) bool {
+	stat, err := os.Stat(path)
+	return (err == nil) && (!stat.IsDir())
 }
