@@ -4,7 +4,6 @@
 [[日本語]](./doc/README.ja.md)
 # mkgoprj - Golang project template generator
 mkgoprj command generate golang project template at current directory. The following three projects can be created.
-- Application project
 - Library project
 - Command Line Interface project with [cobra](https://github.com/spf13/cobra)
 
@@ -24,7 +23,7 @@ $ go install github.com/nao1215/mkgoprj/cmd/mkgoprj@latest
 ## Generate application project
 In the following example, the mkgoprj command will generate a sample project. The binary name will be sample, and build using Makefile.
 ```
-$ mkgoprj github.com/nao1215/sample  ※ Argument is same as "$ go mod init"
+$ mkgoprj cli github.com/nao1215/sample  ※ Argument is same as "$ go mod init"
 mkgoprj starts creating the 'sample' application project (import path='github.com/nao1215/sample')
 
 [START] check if mkgoprj can create the project
@@ -32,49 +31,44 @@ mkgoprj starts creating the 'sample' application project (import path='github.co
 [START] create files
         sample (your project root)
          ├─ CODE_OF_CONDUCT.md
+         ├─ main.go
          ├─ Makefile
          ├─ Changelog.md
          ├─ .goreleaser.yml
          ├─ cmd
-         │  └─ sample
-         │     ├─ main.go
-         │     ├─ main_test.go
-         │     └─ doc.go
-         └─ .github
-            ├─ dependabot.yml
-            ├─ ISSUE_TEMPLATE
-            │  ├─ issue.md
-            │  └─ bug_report.md
-            └─ workflows
-               ├─ reviewdog.yml
-               ├─ build.yml
-               ├─ unit_test.yml
-               └─ release.yml
+         │  ├─ version.go
+         │  └─ root.go
+         ├─ .github
+         │  ├─ dependabot.yml
+         │  ├─ ISSUE_TEMPLATE
+         │  │  ├─ issue.md
+         │  │  └─ bug_report.md
+         │  └─ workflows
+         │     ├─ reviewdog.yml
+         │     ├─ build.yml
+         │     ├─ unit_test.yml
+         │     └─ release.yml
+         └─ internal
+            ├─ cmdinfo
+            │  └─ cmdinfo.go
+            ├─ completion
+            │  └─ completion.go
+            └─ print
+               └─ print.go
 [START] Execute 'go mod init github.com/nao1215/sample'
+[START] Execute 'go mod tidy'
 
-BUILD SUCCESSFUL in 6[ms]
+BUILD SUCCESSFUL in 2485[ms]
 
 $ cd sample
 $ make build
 $ ls
-Changelog.md  Makefile  cmd  go.mod  sample
-
-$ ./sample 
-Hello, World
-
-$ make test
-env GOOS=linux go test -v -cover ./... -coverprofile=cover.out
-=== RUN   TestHelloWorld
---- PASS: TestHelloWorld (0.00s)
-PASS
-coverage: 50.0% of statements
-ok      github.com/nao1215/sample/cmd/sample    0.001s  coverage: 50.0% of statements
-go tool cover -html=cover.out -o cover.html
+CODE_OF_CONDUCT.md  Changelog.md  Makefile  cmd  go.mod  go.sum  internal  main.go  sample
 ```
 
 ## Generate library project
 ```
-$ mkgoprj --library github.com/nao1215/sample
+$ mkgoprj library github.com/nao1215/sample
 mkgoprj starts creating the 'sample' library project (import path='github.com/nao1215/sample')
 
 [START] check if mkgoprj can create the project
@@ -85,7 +79,6 @@ mkgoprj starts creating the 'sample' library project (import path='github.com/na
          ├─ CODE_OF_CONDUCT.md
          ├─ Makefile
          ├─ Changelog.md
-         ├─ doc.go
          ├─ sample.go
          └─ .github
             ├─ dependabot.yml
@@ -97,7 +90,17 @@ mkgoprj starts creating the 'sample' library project (import path='github.com/na
                └─ unit_test.yml
 [START] Execute 'go mod init github.com/nao1215/sample'
 
-BUILD SUCCESSFUL in 3[ms]
+BUILD SUCCESSFUL in 5[ms]
+
+$ cd sample/
+$ make test
+env GOOS=linux go test -v -cover ./... -coverprofile=cover.out
+=== RUN   TestHelloWorld
+--- PASS: TestHelloWorld (0.00s)
+PASS
+coverage: 100.0% of statements
+ok      github.com/nao1215/sample       0.002s  coverage: 100.0% of statements
+go tool cover -html=cover.out -o cover.html
 ```
 
 # Self-documented Makefile
@@ -118,6 +121,15 @@ build:  ## Build binary
 clean: ## Clean project
 	-rm -rf $(APP) cover.out cover.html
 ```
+
+# Auto-generate shell completion file (for bash, zsh, fish)
+mkgoprj command automatically generates shell completion files for bash, zsh, and fish. After the user executes gup, if the shell completion file does not exist in the system, the auto-generation process will begin. To activate the completion feature, restart the shell.
+
+$ mkgoprj 
+mkgoprj:INFO : append bash-completion file: /home/nao/.bash_completion
+mkgoprj:INFO : create fish-completion file: /home/nao/.config/fish/completions/mkgoprj.fish
+mkgoprj:INFO : create zsh-completion file: /home/nao/.zsh/completion/_mkgoprj
+
 # Contact
 If you would like to send comments such as "find a bug" or "request for additional features" to the developer, please use one of the following contacts.
 
