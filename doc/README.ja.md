@@ -1,12 +1,13 @@
 [![Build](https://github.com/nao1215/mkgoprj/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/nao1215/mkgoprj/actions/workflows/build.yml)  
 # mkgoprj - Golngプロジェクトテンプレートジェネレータ
+![Screenshot](./images/demo.gif) 
+  
 mkgoprjコマンドは、golangプロジェクトテンプレートをカレントディレクトリに作成します。作成できるプロジェクトは、以下の３つです。
 - ライブラリプロジェクト
 - [cobra](https://github.com/spf13/cobra)を用いたCLIプロジェクト
 
 自動生成するファイルには、「プロジェクト管理を簡単にするMakefile」と「GitHub Actionsのファイル（ビルド、ユニットテスト、リリース、レビュードッグ、dependabot）」が含まれます。ただし、"$ git init"は実行しません。  
-  
-![Screenshot](./images/demo.gif) 
+
   
 # インストール方法
 ## Step1. Golangのインストール
@@ -20,6 +21,7 @@ $ go install github.com/nao1215/mkgoprj@latest
 # 使い方
 ## アプリケーションプロジェクトの作成
 以下の例では、mkgoprjコマンドはsampleプロジェクトを作成します。バイナリ名は"sample"で、ビルドにはMakefileを使います。
+
 ```
 $ mkgoprj cli github.com/nao1215/sample  ※ 引数は"$ go mod init"と同じ。
 mkgoprj starts creating the 'sample' application project (import path='github.com/nao1215/sample')
@@ -63,8 +65,9 @@ $ make build
 $ ls
 CODE_OF_CONDUCT.md  Changelog.md  Makefile  cmd  go.mod  go.sum  internal  main.go  sample
 ```
-
+  
 ## ライブラリプロジェクトの作成
+```
 $ mkgoprj library github.com/nao1215/sample
 mkgoprj starts creating the 'sample' library project (import path='github.com/nao1215/sample')
 

@@ -3,13 +3,13 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/nao1215/mkgoprj)](https://goreportcard.com/report/github.com/nao1215/mkgoprj)   
 [[日本語]](./doc/README.ja.md)
 # mkgoprj - Golang project template generator
+![Screenshot](./doc/images/demo.gif) 
+  
 mkgoprj command generate golang project template at current directory. The following three projects can be created.
 - Library project
 - Command Line Interface project with [cobra](https://github.com/spf13/cobra)
 
 The automatically generated files include "Makefile for easy project management" and "GitHub Actions files (build, unit test, review-dog, goreleaser, dependabot)". However, it does not run "$ git init".  
-  
-![Screenshot](./doc/images/demo.gif) 
   
 # How to install
 ## Step1. Install golang
