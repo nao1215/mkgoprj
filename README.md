@@ -9,7 +9,7 @@ mkgoprj command generate golang project template at current directory. The follo
 
 The automatically generated files include "Makefile for easy project management" and "GitHub Actions files (build, unit test, review-dog, goreleaser, dependabot)". However, it does not run "$ git init".  
   
-![Screenshot](./doc/images/sample.png) 
+![Screenshot](./doc/images/demo.gif) 
   
 # How to install
 ## Step1. Install golang
@@ -123,12 +123,14 @@ clean: ## Clean project
 ```
 
 # Auto-generate shell completion file (for bash, zsh, fish)
-mkgoprj command automatically generates shell completion files for bash, zsh, and fish. After the user executes gup, if the shell completion file does not exist in the system, the auto-generation process will begin. To activate the completion feature, restart the shell.
+mkgoprj command automatically generates shell completion files for bash, zsh, and fish. After the user executes mkgoprj, if the shell completion file does not exist in the system, the auto-generation process will begin. To activate the completion feature, restart the shell.
 
+```
 $ mkgoprj 
 mkgoprj:INFO : append bash-completion file: /home/nao/.bash_completion
 mkgoprj:INFO : create fish-completion file: /home/nao/.config/fish/completions/mkgoprj.fish
 mkgoprj:INFO : create zsh-completion file: /home/nao/.zsh/completion/_mkgoprj
+```
 
 # Contact
 If you would like to send comments such as "find a bug" or "request for additional features" to the developer, please use one of the following contacts.
