@@ -31,9 +31,13 @@ func Dirs(name string, lib, cli, noRoot bool) []string {
 		if noRoot {
 			dirs = append(dirs, "cmd")
 			dirs = append(dirs, filepath.Join("internal", "cmdinfo"))
+			dirs = append(dirs, filepath.Join("internal", "completion"))
+			dirs = append(dirs, filepath.Join("internal", "print"))
 		} else {
 			dirs = append(dirs, filepath.Join(name, "cmd"))
 			dirs = append(dirs, filepath.Join(name, "internal", "cmdinfo"))
+			dirs = append(dirs, filepath.Join(name, "internal", "completion"))
+			dirs = append(dirs, filepath.Join(name, "internal", "print"))
 		}
 	}
 	return dirs
@@ -57,11 +61,15 @@ func Files(name, importPath string, lib, cli, noRoot bool) map[string]string {
 	}
 
 	if cli {
-		path, code := rootFile(name, noRoot)
+		path, code := rootFile(name, importPath, noRoot)
 		files[path] = code
 		path, code = versionFile(name, importPath, noRoot)
 		files[path] = code
 		path, code = cmdInfoFile(name, noRoot)
+		files[path] = code
+		path, code = completionFile(name, importPath, noRoot)
+		files[path] = code
+		path, code = printFile(name, importPath, noRoot)
 		files[path] = code
 	}
 
@@ -497,7 +505,7 @@ changelog:
 	return path, data
 }
 
-func rootFile(name string, noRoot bool) (string, string) {
+func rootFile(name, importPath string, noRoot bool) (string, string) {
 	var path string
 	if noRoot {
 		path = filepath.Join("cmd", "root.go")
@@ -510,6 +518,7 @@ import (
 	"fmt"
 	"os"
 
+	"XXX_PATH_XXX/internal/completion"
 	"github.com/spf13/cobra"
 )
 
@@ -524,15 +533,15 @@ func exitError(msg interface{}) {
 
 // Execute start command.
 func Execute() {
-	rootCmd.Run = func(cmd *cobra.Command, args []string) {
-		_ = rootCmd.Help()
-	}
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
+	completion.DeployShellCompletionFileIfNeeded(rootCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		exitError(err)
 	}
 }
 `
+	data = strings.Replace(data, "XXX_PATH_XXX", importPath, 1)
 	data = strings.Replace(data, "XXX_CMD_XXX", name, 1)
 	return path, data
 }
@@ -599,6 +608,347 @@ func Name() string {
 }
 `
 	data = strings.Replace(data, "XXX_NAME_XXX", name, 1)
+	return path, data
+}
+
+func completionFile(name, importPath string, noRoot bool) (string, string) {
+	var path string
+	if noRoot {
+		path = filepath.Join("internal", "completion", "completion.go")
+	} else {
+		path = filepath.Join(name, "internal", "completion", "completion.go")
+	}
+	data := `package completion
+
+import (
+	"bytes"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"XXX_PATH_XXX/internal/cmdinfo"
+	"XXX_PATH_XXX/internal/print"
+	"github.com/spf13/cobra"
+)
+
+// DeleteShellCompletionFileIfNeeded creates the shell completion file.
+// If the file with the same contents already exists, it is not created.
+func DeployShellCompletionFileIfNeeded(cmd *cobra.Command) {
+	makeBashCompletionFileIfNeeded(cmd)
+	makeFishCompletionFileIfNeeded(cmd)
+	makeZshCompletionFileIfNeeded(cmd)
+}
+
+func makeBashCompletionFileIfNeeded(cmd *cobra.Command) {
+	if existSameBashCompletionFile(cmd) {
+		return
+	}
+
+	path := bashCompletionFilePath()
+	bashCompletion := new(bytes.Buffer)
+	if err := cmd.GenBashCompletion(bashCompletion); err != nil {
+		print.Err(fmt.Errorf("can not generate bash completion content: %w", err))
+		return
+	}
+
+	if !isFile(path) {
+		fp, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0664)
+		if err != nil {
+			print.Err(fmt.Errorf("can not create .bash_completion: %w", err))
+			return
+		}
+		defer fp.Close()
+
+		if _, err := fp.WriteString(bashCompletion.String()); err != nil {
+			print.Err(fmt.Errorf("can not write .bash_completion %w", err))
+			return
+		}
+		print.Info("create bash-completion file: " + path)
+		return
+	}
+
+	fp, err := os.OpenFile(path, os.O_RDWR|os.O_APPEND, 0664)
+	if err != nil {
+		print.Err(fmt.Errorf("can not append .bash_completion for gup: %w", err))
+		return
+	}
+	defer fp.Close()
+
+	if _, err := fp.WriteString(bashCompletion.String()); err != nil {
+		print.Err(fmt.Errorf("can not append .bash_completion for gup: %w", err))
+		return
+	}
+
+	print.Info("append bash-completion for gup: " + path)
+}
+
+func makeFishCompletionFileIfNeeded(cmd *cobra.Command) {
+	if isSameFishCompletionFile(cmd) {
+		return
+	}
+
+	path := fishCompletionFilePath()
+	if err := os.MkdirAll(filepath.Dir(path), 0775); err != nil {
+		print.Err(fmt.Errorf("can not create fish-completion file: %w", err))
+		return
+	}
+
+	if err := cmd.GenFishCompletionFile(path, false); err != nil {
+		print.Err(fmt.Errorf("can not create fish-completion file: %w", err))
+		return
+	}
+	print.Info("create fish-completion file: " + path)
+}
+
+func makeZshCompletionFileIfNeeded(cmd *cobra.Command) {
+	if isSameZshCompletionFile(cmd) {
+		return
+	}
+
+	path := zshCompletionFilePath()
+	if err := os.MkdirAll(filepath.Dir(path), 0775); err != nil {
+		print.Err(fmt.Errorf("can not create zsh-completion file: %w", err))
+		return
+	}
+
+	if err := cmd.GenZshCompletionFile(path); err != nil {
+		print.Err(fmt.Errorf("can not create zsh-completion file: %w", err))
+		return
+	}
+	print.Info("create zsh-completion file: " + path)
+
+	appendFpathAtZshrcIfNeeded()
+}
+
+func appendFpathAtZshrcIfNeeded() {
+	const zshFpath = XXX_ZSH_FPATH_XXX
+
+	zshrcPath := zshrcPath()
+	if !isFile(zshrcPath) {
+		fp, err := os.OpenFile(zshrcPath, os.O_RDWR|os.O_CREATE, 0664)
+		if err != nil {
+			print.Err(fmt.Errorf("can not add zsh $fpath in .zshrc: %w", err).Error())
+			return
+		}
+		defer fp.Close()
+
+		if _, err := fp.WriteString(zshFpath); err != nil {
+			print.Err(fmt.Errorf("can not add zsh $fpath in .zshrc: %w", err).Error())
+		}
+		return
+	}
+
+	zshrc, err := os.ReadFile(zshrcPath)
+	if err != nil {
+		print.Err(fmt.Errorf("can not read .zshrc: %w", err).Error())
+		return
+	}
+
+	if strings.Contains(string(zshrc), zshFpath) {
+		return
+	}
+
+	fp, err := os.OpenFile(zshrcPath, os.O_RDWR|os.O_APPEND, 0664)
+	if err != nil {
+		print.Err(fmt.Errorf("can not add zsh $fpath in .zshrc: %w", err).Error())
+		return
+	}
+	defer fp.Close()
+
+	if _, err := fp.WriteString(zshFpath); err != nil {
+		print.Err(fmt.Errorf("can not add zsh $fpath in .zshrc: %w", err).Error())
+		return
+	}
+}
+
+func existSameBashCompletionFile(cmd *cobra.Command) bool {
+	if !isFile(bashCompletionFilePath()) {
+		return false
+	}
+	return hasSameBashCompletionContent(cmd)
+}
+
+func hasSameBashCompletionContent(cmd *cobra.Command) bool {
+	bashCompletionFileInLocal, err := os.ReadFile(bashCompletionFilePath())
+	if err != nil {
+		print.Err(fmt.Errorf("can not read .bash_completion: %w", err).Error())
+		return false
+	}
+
+	currentBashCompletion := new(bytes.Buffer)
+	if err := cmd.GenBashCompletion(currentBashCompletion); err != nil {
+		return false
+	}
+	if !strings.Contains(string(bashCompletionFileInLocal), currentBashCompletion.String()) {
+		return false
+	}
+	return true
+}
+
+func isSameFishCompletionFile(cmd *cobra.Command) bool {
+	path := fishCompletionFilePath()
+	if !isFile(path) {
+		return false
+	}
+
+	currentFishCompletion := new(bytes.Buffer)
+	if err := cmd.GenFishCompletion(currentFishCompletion, false); err != nil {
+		return false
+	}
+
+	fishCompletionInLocal, err := os.ReadFile(path)
+	if err != nil {
+		return false
+	}
+
+	if bytes.Compare(currentFishCompletion.Bytes(), fishCompletionInLocal) != 0 {
+		return false
+	}
+	return true
+}
+
+func isSameZshCompletionFile(cmd *cobra.Command) bool {
+	path := zshCompletionFilePath()
+	if !isFile(path) {
+		return false
+	}
+
+	currentZshCompletion := new(bytes.Buffer)
+	if err := cmd.GenZshCompletion(currentZshCompletion); err != nil {
+		return false
+	}
+
+	zshCompletionInLocal, err := os.ReadFile(path)
+	if err != nil {
+		return false
+	}
+
+	if bytes.Compare(currentZshCompletion.Bytes(), zshCompletionInLocal) != 0 {
+		return false
+	}
+	return true
+}
+
+// bashCompletionFilePath return bash-completion file path.
+func bashCompletionFilePath() string {
+	return filepath.Join(os.Getenv("HOME"), ".bash_completion")
+}
+
+// fishCompletionFilePath return fish-completion file path.
+func fishCompletionFilePath() string {
+	return filepath.Join(os.Getenv("HOME"), ".config", "fish", "completions", cmdinfo.Name()+".fish")
+}
+
+// zshCompletionFilePath return zsh-completion file path.
+func zshCompletionFilePath() string {
+	return filepath.Join(os.Getenv("HOME"), ".zsh", "completion", "_"+cmdinfo.Name())
+}
+
+// zshrcPath return .zshrc path.
+func zshrcPath() string {
+	return filepath.Join(os.Getenv("HOME"), ".zshrc")
+}
+
+// isFile reports whether the path exists and is a file.
+func isFile(path string) bool {
+	stat, err := os.Stat(path)
+	return (err == nil) && (!stat.IsDir())
+}
+`
+
+	zshFpath := "`"
+	zshFpath += `
+# setting for gup command (auto generate)
+fpath=(~/.zsh/completion $fpath)
+autoload -Uz compinit && compinit -i
+`
+	zshFpath += "`"
+
+	data = strings.Replace(data, "XXX_PATH_XXX", importPath, -1)
+	data = strings.Replace(data, "XXX_ZSH_FPATH_XXX", zshFpath, 1)
+	return path, data
+}
+
+func printFile(name, importPath string, noRoot bool) (string, string) {
+	var path string
+	if noRoot {
+		path = filepath.Join("internal", "print", "print.go")
+	} else {
+		path = filepath.Join(name, "internal", "print", "print.go")
+	}
+	data := `package print
+
+import (
+	"fmt"
+	"os"
+	"strings"
+
+	"github.com/fatih/color"
+	"github.com/mattn/go-colorable"
+	"XXX_PATH_XXX/internal/cmdinfo"
+)
+
+var (
+	// Stdout is new instance of Writer which handles escape sequence for stdout.
+	Stdout = colorable.NewColorableStdout()
+	// Stderr is new instance of Writer which handles escape sequence for stderr.
+	Stderr = colorable.NewColorableStderr()
+)
+
+// Info print information message at STDOUT.
+func Info(msg string) {
+	fmt.Fprintf(Stdout, "%s:%s: %s\n",
+		cmdinfo.Name(), color.GreenString("INFO "), msg)
+}
+
+// Warn print warning message at STDERR.
+func Warn(err interface{}) {
+	fmt.Fprintf(Stderr, "%s:%s: %v\n",
+		cmdinfo.Name(), color.YellowString("WARN "), err)
+}
+
+// Err print error message at STDERR.
+func Err(err interface{}) {
+	fmt.Fprintf(Stderr, "%s:%s: %v\n",
+		cmdinfo.Name(), color.HiYellowString("ERROR"), err)
+}
+
+// Fatal print dying message at STDERR.
+func Fatal(err interface{}) {
+	fmt.Fprintf(Stderr, "%s:%s: %v\n",
+		cmdinfo.Name(), color.RedString("FATAL"), err)
+	os.Exit(1)
+}
+
+// Question displays the question in the terminal and receives an answer from the user.
+func Question(ask string) bool {
+	var response string
+
+	fmt.Fprintf(Stdout, "%s:%s: %s",
+		cmdinfo.Name(), color.GreenString("CHECK"), ask+" [Y/n] ")
+	_, err := fmt.Scanln(&response)
+	if err != nil {
+		// If user input only enter.
+		if strings.Contains(err.Error(), "expected newline") {
+			return Question(ask)
+		}
+		fmt.Fprint(os.Stderr, err.Error())
+		return false
+	}
+
+	switch strings.ToLower(response) {
+	case "y", "yes":
+		return true
+	case "n", "no":
+		return false
+	default:
+		return Question(ask)
+	}
+}	
+`
+
+	data = strings.Replace(data, "XXX_PATH_XXX", importPath, -1)
 	return path, data
 }
 
