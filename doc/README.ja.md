@@ -1,4 +1,3 @@
-[![Build](https://github.com/nao1215/mkgoprj/v2/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/nao1215/mkgoprj/v2/actions/workflows/build.yml)  
 # mkgoprj - Golngプロジェクトテンプレートジェネレータ
 ![Screenshot](./images/demo.gif) 
   
