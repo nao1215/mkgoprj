@@ -163,13 +163,6 @@ func TestHelloWorld(t *testing.T) {
 			path = filepath.Join(name, name+"_test.go")
 		}
 		code = strings.ReplaceAll(code, "XXX_PKG_XXX", name)
-	} else {
-		if noRoot {
-			path = filepath.Join("cmd", name, "main_test.go")
-		} else {
-			path = filepath.Join(name, "cmd", name, "main_test.go")
-		}
-		code = strings.ReplaceAll(code, "XXX_PKG_XXX", "main")
 	}
 	return path, code
 }
@@ -459,11 +452,7 @@ changelog:
       - "^test:"	
 `
 	data = strings.Replace(data, "XXX_APP_NAME_XXX", name, 1)
-	if cli {
-		data = strings.Replace(data, "XXX_BUILD_TARGET_XXX", ".", 1)
-	} else {
-		data = strings.Replace(data, "XXX_BUILD_TARGET_XXX", "./cmd/"+name, 1)
-	}
+	data = strings.Replace(data, "XXX_BUILD_TARGET_XXX", ".", 1)
 	return path, data
 }
 
