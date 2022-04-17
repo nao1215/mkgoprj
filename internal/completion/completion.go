@@ -51,17 +51,17 @@ func makeBashCompletionFileIfNeeded(cmd *cobra.Command) {
 
 	fp, err := os.OpenFile(path, os.O_RDWR|os.O_APPEND, 0664)
 	if err != nil {
-		print.Err(fmt.Errorf("can not append .bash_completion for gup: %w", err))
+		print.Err(fmt.Errorf("can not append .bash_completion for mkgoprj: %w", err))
 		return
 	}
 	defer fp.Close()
 
 	if _, err := fp.WriteString(bashCompletion.String()); err != nil {
-		print.Err(fmt.Errorf("can not append .bash_completion for gup: %w", err))
+		print.Err(fmt.Errorf("can not append .bash_completion for mkgoprj: %w", err))
 		return
 	}
 
-	print.Info("append bash-completion for gup: " + path)
+	print.Info("append bash-completion for mkgoprj: " + path)
 }
 
 func makeFishCompletionFileIfNeeded(cmd *cobra.Command) {
@@ -104,7 +104,7 @@ func makeZshCompletionFileIfNeeded(cmd *cobra.Command) {
 
 func appendFpathAtZshrcIfNeeded() {
 	const zshFpath = `
-# setting for gup command (auto generate)
+# setting for mkgoprj command (auto generate)
 fpath=(~/.zsh/completion $fpath)
 autoload -Uz compinit && compinit -i
 `

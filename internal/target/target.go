@@ -632,17 +632,17 @@ func makeBashCompletionFileIfNeeded(cmd *cobra.Command) {
 
 	fp, err := os.OpenFile(path, os.O_RDWR|os.O_APPEND, 0664)
 	if err != nil {
-		print.Err(fmt.Errorf("can not append .bash_completion for gup: %w", err))
+		print.Err(fmt.Errorf("can not append .bash_completion for XXX_NAME_XXX: %w", err))
 		return
 	}
 	defer fp.Close()
 
 	if _, err := fp.WriteString(bashCompletion.String()); err != nil {
-		print.Err(fmt.Errorf("can not append .bash_completion for gup: %w", err))
+		print.Err(fmt.Errorf("can not append .bash_completion for XXX_NAME_XXX: %w", err))
 		return
 	}
 
-	print.Info("append bash-completion for gup: " + path)
+	print.Info("append bash-completion for XXX_NAME_XXX: " + path)
 }
 
 func makeFishCompletionFileIfNeeded(cmd *cobra.Command) {
@@ -821,13 +821,14 @@ func isFile(path string) bool {
 
 	zshFpath := "`"
 	zshFpath += `
-# setting for gup command (auto generate)
+# setting for XXX_NAME_XXX command (auto generate)
 fpath=(~/.zsh/completion $fpath)
 autoload -Uz compinit && compinit -i
 `
 	zshFpath += "`"
 
 	data = strings.Replace(data, "XXX_PATH_XXX", importPath, -1)
+	data = strings.Replace(data, "XXX_NAME_XXX", name, -1)
 	data = strings.Replace(data, "XXX_ZSH_FPATH_XXX", zshFpath, 1)
 	return path, data
 }
