@@ -1,5 +1,5 @@
-[![Build](https://github.com/nao1215/mkgoprj/v2/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/nao1215/mkgoprj/v2/actions/workflows/build.yml)
-[![reviewdog](https://github.com/nao1215/mkgoprj/v2/actions/workflows/review_dog.yml/badge.svg)](https://github.com/nao1215/mkgoprj/v2/actions/workflows/review_dog.yml)
+[![Build](https://github.com/nao1215/mkgoprj/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/nao1215/mkgoprj/v2/actions/workflows/build.yml)
+[![reviewdog](https://github.com/nao1215/mkgoprj/actions/workflows/review_dog.yml/badge.svg)](https://github.com/nao1215/mkgoprj/v2/actions/workflows/review_dog.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/nao1215/mkgoprj/v2)](https://goreportcard.com/report/github.com/nao1215/mkgoprj/v2)   
 [[日本語]](./doc/README.ja.md)
 # mkgoprj - Golang project template generator
