@@ -1,4 +1,4 @@
-[![Build](https://github.com/nao1215/mkgoprj/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/nao1215/mkgoprj/actions/workflows/build.yml)  
+[![Build](https://github.com/nao1215/mkgoprj/v2/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/nao1215/mkgoprj/v2/actions/workflows/build.yml)  
 # mkgoprj - Golngプロジェクトテンプレートジェネレータ
 ![Screenshot](./images/demo.gif) 
   
@@ -15,7 +15,7 @@ Golangをシステムにインストールしていない場合は、まずはgo
   
 ## Step2. mkgoprjのインストール
 ```
-$ go install github.com/nao1215/mkgoprj@latest
+$ go install github.com/nao1215/mkgoprj/v2@latest
 ```
   
 # 使い方
@@ -136,7 +136,7 @@ mkgoprj:INFO : create zsh-completion file: /home/nao/.zsh/completion/_mkgoprj
 # 連絡先
 「バグを見つけた場合」や「機能追加要望」に関するコメントを開発者に送りたい場合は、以下の連絡先を使用してください。
 
-- [GitHub Issue](https://github.com/nao1215/mkgoprj/issues)
+- [GitHub Issue](https://github.com/nao1215/mkgoprj/v2/issues)
 
 # ライセンス
 mkgoprjプロジェクトは、[Apache License 2.0](./LICENSE)条文の下でライセンスされています。

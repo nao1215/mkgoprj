@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/nao1215/mkgoprj/internal/gotool"
-	"github.com/nao1215/mkgoprj/internal/ioutils"
-	"github.com/nao1215/mkgoprj/internal/target"
+	"github.com/nao1215/mkgoprj/v2/internal/gotool"
+	"github.com/nao1215/mkgoprj/v2/internal/ioutils"
+	"github.com/nao1215/mkgoprj/v2/internal/target"
 )
 
 type Option struct {

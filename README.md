@@ -1,6 +1,6 @@
-[![Build](https://github.com/nao1215/mkgoprj/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/nao1215/mkgoprj/actions/workflows/build.yml)
-[![reviewdog](https://github.com/nao1215/mkgoprj/actions/workflows/review_dog.yml/badge.svg)](https://github.com/nao1215/mkgoprj/actions/workflows/review_dog.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/nao1215/mkgoprj)](https://goreportcard.com/report/github.com/nao1215/mkgoprj)   
+[![Build](https://github.com/nao1215/mkgoprj/v2/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/nao1215/mkgoprj/v2/actions/workflows/build.yml)
+[![reviewdog](https://github.com/nao1215/mkgoprj/v2/actions/workflows/review_dog.yml/badge.svg)](https://github.com/nao1215/mkgoprj/v2/actions/workflows/review_dog.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/nao1215/mkgoprj/v2)](https://goreportcard.com/report/github.com/nao1215/mkgoprj/v2)   
 [[日本語]](./doc/README.ja.md)
 # mkgoprj - Golang project template generator
 ![Screenshot](./doc/images/demo.gif) 
@@ -16,7 +16,7 @@ The automatically generated files include "Makefile for easy project management"
 If you don't install golang in your system, please install Golang first. Check the [Go official website](https://go.dev/doc/install) for how to install golang.
 ## Step2. Install mkgoprj
 ```
-$ go install github.com/nao1215/mkgoprj@latest
+$ go install github.com/nao1215/mkgoprj/v2@latest
 ```
   
 # How to use
@@ -135,7 +135,7 @@ mkgoprj:INFO : create zsh-completion file: /home/nao/.zsh/completion/_mkgoprj
 # Contact
 If you would like to send comments such as "find a bug" or "request for additional features" to the developer, please use one of the following contacts.
 
-- [GitHub Issue](https://github.com/nao1215/mkgoprj/issues)
+- [GitHub Issue](https://github.com/nao1215/mkgoprj/v2/issues)
 
 # LICENSE
 The mkgoprj project is licensed under the terms of [the Apache License 2.0](./LICENSE).

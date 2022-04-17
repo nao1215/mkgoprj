@@ -1,4 +1,4 @@
-module github.com/nao1215/mkgoprj
+module github.com/nao1215/mkgoprj/v2
 
 go 1.18
 

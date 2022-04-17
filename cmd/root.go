@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nao1215/mkgoprj/internal/completion"
+	"github.com/nao1215/mkgoprj/v2/internal/completion"
 	"github.com/spf13/cobra"
 )
 

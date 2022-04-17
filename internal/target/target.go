@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/nao1215/mkgoprj/internal/gotool"
+	"github.com/nao1215/mkgoprj/v2/internal/gotool"
 )
 
 // Dirs returns the directory to be created.
