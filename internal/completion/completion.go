@@ -67,7 +67,7 @@ func makeBashCompletionFileIfNeeded(cmd *cobra.Command) {
 		print.Err(fmt.Errorf("can not close .bash_completion: %w", err))
 		return
 	}
-	print.Info("append bash-completion for mkgoprj: " + path)
+	print.Info("append bash-completion: " + path)
 }
 
 func makeFishCompletionFileIfNeeded(cmd *cobra.Command) {

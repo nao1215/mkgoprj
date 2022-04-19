@@ -583,7 +583,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// DeleteShellCompletionFileIfNeeded creates the shell completion file.
+// DeployShellCompletionFileIfNeeded creates the shell completion file.
 // If the file with the same contents already exists, it is not created.
 func DeployShellCompletionFileIfNeeded(cmd *cobra.Command) {
 	makeBashCompletionFileIfNeeded(cmd)
@@ -606,32 +606,38 @@ func makeBashCompletionFileIfNeeded(cmd *cobra.Command) {
 	if !isFile(path) {
 		fp, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0664)
 		if err != nil {
-			print.Err(fmt.Errorf("can not create .bash_completion: %w", err))
+			print.Err(fmt.Errorf("can not open .bash_completion: %w", err))
 			return
 		}
-		defer fp.Close()
 
 		if _, err := fp.WriteString(bashCompletion.String()); err != nil {
 			print.Err(fmt.Errorf("can not write .bash_completion %w", err))
 			return
 		}
-		print.Info("create bash-completion file: " + path)
+
+		if err := fp.Close(); err != nil {
+			print.Err(fmt.Errorf("can not close .bash_completion %w", err))
+			return
+		}
 		return
 	}
 
 	fp, err := os.OpenFile(path, os.O_RDWR|os.O_APPEND, 0664)
 	if err != nil {
-		print.Err(fmt.Errorf("can not append .bash_completion for XXX_NAME_XXX: %w", err))
+		print.Err(fmt.Errorf("can not append .bash_completion: %w", err))
 		return
 	}
-	defer fp.Close()
 
 	if _, err := fp.WriteString(bashCompletion.String()); err != nil {
-		print.Err(fmt.Errorf("can not append .bash_completion for XXX_NAME_XXX: %w", err))
+		print.Err(fmt.Errorf("can not write .bash_completion: %w", err))
 		return
 	}
 
-	print.Info("append bash-completion for XXX_NAME_XXX: " + path)
+	if err := fp.Close(); err != nil {
+		print.Err(fmt.Errorf("can not close .bash_completion: %w", err))
+		return
+	}
+	print.Info("append bash-completion: " + path)
 }
 
 func makeFishCompletionFileIfNeeded(cmd *cobra.Command) {
@@ -679,13 +685,18 @@ func appendFpathAtZshrcIfNeeded() {
 	if !isFile(zshrcPath) {
 		fp, err := os.OpenFile(zshrcPath, os.O_RDWR|os.O_CREATE, 0664)
 		if err != nil {
-			print.Err(fmt.Errorf("can not add zsh $fpath in .zshrc: %w", err).Error())
+			print.Err(fmt.Errorf("can not open .zshrc: %w", err).Error())
 			return
 		}
-		defer fp.Close()
 
 		if _, err := fp.WriteString(zshFpath); err != nil {
-			print.Err(fmt.Errorf("can not add zsh $fpath in .zshrc: %w", err).Error())
+			print.Err(fmt.Errorf("can not write zsh $fpath in .zshrc: %w", err).Error())
+			return
+		}
+
+		if err := fp.Close(); err != nil {
+			print.Err(fmt.Errorf("can not close .zshrc: %w", err).Error())
+			return
 		}
 		return
 	}
@@ -702,13 +713,17 @@ func appendFpathAtZshrcIfNeeded() {
 
 	fp, err := os.OpenFile(zshrcPath, os.O_RDWR|os.O_APPEND, 0664)
 	if err != nil {
-		print.Err(fmt.Errorf("can not add zsh $fpath in .zshrc: %w", err).Error())
+		print.Err(fmt.Errorf("can not open .zshrc: %w", err).Error())
 		return
 	}
-	defer fp.Close()
 
 	if _, err := fp.WriteString(zshFpath); err != nil {
-		print.Err(fmt.Errorf("can not add zsh $fpath in .zshrc: %w", err).Error())
+		print.Err(fmt.Errorf("can not write zsh $fpath in .zshrc: %w", err).Error())
+		return
+	}
+
+	if err := fp.Close(); err != nil {
+		print.Err(fmt.Errorf("can not close .zshrc: %w", err).Error())
 		return
 	}
 }
