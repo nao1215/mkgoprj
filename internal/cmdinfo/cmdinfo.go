@@ -6,7 +6,7 @@ import (
 
 const (
 	name    = "mkgoprj"
-	version = "2.0.2"
+	version = "2.1.0"
 )
 
 // Version return mkgoprj command version.
