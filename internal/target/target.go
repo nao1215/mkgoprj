@@ -87,6 +87,10 @@ func Files(name, importPath string, lib, cli, noRoot bool) map[string]string {
 		path, code = goreleaser(name, noRoot, cli)
 		files[path] = code
 	}
+
+	path, code = githubContributors(name, noRoot)
+	files[path] = code
+
 	path, code = githubUnitTestYml(name, noRoot)
 	files[path] = code
 
@@ -363,6 +367,49 @@ jobs:
           reporter: github-pr-review
           level: warning
 `
+	return path, data
+}
+
+func githubContributors(name string, noRoot bool) (string, string) {
+	var path string
+	if noRoot {
+		path = filepath.Join(".github", "workflows", "contributors.yml")
+	} else {
+		path = filepath.Join(name, ".github", "workflows", "contributors.yml")
+	}
+	data := `name: Contributors
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  contributors:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: "XXX_VER_XXX"
+
+      - name: Generate Contributors
+        run: |
+          go install github.com/nao1215/contributor@latest
+          git remote set-url origin https://github-actions:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          contributor --file
+          git add .
+          git commit -m "Update Contributors List"
+          git push origin HEAD:${GITHUB_REF}
+`
+	data = strings.Replace(data, "XXX_VER_XXX", gotool.Version(), 1)
 	return path, data
 }
 
