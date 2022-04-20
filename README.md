@@ -47,7 +47,8 @@ mkgoprj starts creating the 'sample' application project (import path='github.co
          │     ├─ reviewdog.yml
          │     ├─ build.yml
          │     ├─ unit_test.yml
-         │     └─ release.yml
+         │     ├─ release.yml
+         │     └─ contributors.yml
          └─ internal
             ├─ cmdinfo
             │  └─ cmdinfo.go
@@ -87,7 +88,9 @@ mkgoprj starts creating the 'sample' library project (import path='github.com/na
             │  └─ bug_report.md
             └─ workflows
                ├─ reviewdog.yml
-               └─ unit_test.yml
+               ├─ unit_test.yml
+               └─ contributors.yml
+               
 [START] Execute 'go mod init github.com/nao1215/sample'
 
 BUILD SUCCESSFUL in 5[ms]
