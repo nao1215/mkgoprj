@@ -466,20 +466,13 @@ func rootFile(name, importPath string, noRoot bool) (string, string) {
 	data := `package cmd
 
 import (
-	"fmt"
-	"os"
-
 	"XXX_PATH_XXX/internal/completion"
+	"XXX_PATH_XXX/internal/print"
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
 	Use: "XXX_CMD_XXX",
-}
-
-func exitError(msg interface{}) {
-	fmt.Fprintln(os.Stderr, msg)
-	os.Exit(1)
 }
 
 // Execute start command.
@@ -488,11 +481,11 @@ func Execute() {
 	completion.DeployShellCompletionFileIfNeeded(rootCmd)
 
 	if err := rootCmd.Execute(); err != nil {
-		exitError(err)
+		print.Fatal(err)
 	}
 }
 `
-	data = strings.Replace(data, "XXX_PATH_XXX", importPath, 1)
+	data = strings.Replace(data, "XXX_PATH_XXX", importPath, -1)
 	data = strings.Replace(data, "XXX_CMD_XXX", name, 1)
 	return path, data
 }
