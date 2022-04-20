@@ -104,6 +104,17 @@ ok      github.com/nao1215/sample       0.002s  coverage: 100.0% of statements
 go tool cover -html=cover.out -o cover.html
 ```
 
+# GitHub Actions
+mkgoprjコマンドは、プロジェクト作成時に下表のGitHub Actionsを生成します。
+
+| Action name |Description|
+|:--|:--|
+|build| Build the project|
+|unit test| Run unit test|
+|reviewdog|Static Analysis |
+| release|Release projects in units of git tags |
+|contributors | Generate Contributors.md|
+
 # 自己文書化されたMakefile
 mkgoprjコマンドによって生成されるMakefileは、[自己文書化](https://postd.cc/auto-documented-makefile/)されています。makeコマンドを実行した時、Makefileのターゲットリストが表示されます。ターゲット名の横には、ヘルプメッセージが表示されます。
 
