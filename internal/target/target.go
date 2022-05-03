@@ -626,9 +626,15 @@ import (
 // DeployShellCompletionFileIfNeeded creates the shell completion file.
 // If the file with the same contents already exists, it is not created.
 func DeployShellCompletionFileIfNeeded(cmd *cobra.Command) {
-	makeBashCompletionFileIfNeeded(cmd)
-	makeFishCompletionFileIfNeeded(cmd)
-	makeZshCompletionFileIfNeeded(cmd)
+	if !isWindows() {
+		makeBashCompletionFileIfNeeded(cmd)
+		makeFishCompletionFileIfNeeded(cmd)
+		makeZshCompletionFileIfNeeded(cmd)
+	}
+}
+
+func isWindows() bool {
+	return runtime.GOOS == "windows"
 }
 
 func makeBashCompletionFileIfNeeded(cmd *cobra.Command) {
