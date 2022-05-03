@@ -9,7 +9,7 @@ mkgoprj command generate golang project template at current directory. The follo
 - Library project
 - Command Line Interface project with [cobra](https://github.com/spf13/cobra)
 
-The automatically generated files include "Makefile for easy project management" and "GitHub Actions files (build, unit test, review-dog, goreleaser, dependabot)". However, it does not run "$ git init".  
+The automatically generated files include "Makefile for easy project management" and "GitHub Actions files (build, unit test, review-dog, goreleaser, dependabot)". However, it does not run "$ git init". mkgoprj is cross-platform software that runs on Windows, Mac and Linux. [The release page](https://github.com/nao1215/mkgoprj/releases) contains packages in .deb, .rpm, and .apk formats.   
   
 # How to install
 ## Step1. Install golang
