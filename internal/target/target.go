@@ -616,6 +616,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"XXX_PATH_XXX/internal/cmdinfo"
