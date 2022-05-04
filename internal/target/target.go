@@ -380,8 +380,6 @@ func githubContributors(name string, noRoot bool) (string, string) {
 	data := `name: Contributors
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
 
