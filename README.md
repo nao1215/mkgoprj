@@ -146,6 +146,11 @@ mkgoprj:INFO : create fish-completion file: /home/nao/.config/fish/completions/m
 mkgoprj:INFO : create zsh-completion file: /home/nao/.zsh/completion/_mkgoprj
 ```
 
+# Contributing
+First off, thanks for taking the time to contribute! ❤️  See [CONTRIBUTING.md](./CONTRIBUTING.md) for more information.
+Contributions are not only related to development. For example, GitHub Star motivates me to develop!
+[![Star History Chart](https://api.star-history.com/svg?repos=nao1215/mkgoprj&type=Date)](https://star-history.com/#nao1215/mkgoprj&Date)
+
 # Contact
 If you would like to send comments such as "find a bug" or "request for additional features" to the developer, please use one of the following contacts.
 
