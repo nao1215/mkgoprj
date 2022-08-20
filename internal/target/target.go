@@ -192,7 +192,7 @@ GO_TEST     = $(GO) test -v
 GO_TOOL     = $(GO) tool
 GO_VET      = $(GO) vet
 GO_DEP      = $(GO) mod
-GOOS        = XXX_OS_XXX
+GOOS        = ""
 GOARCH      = XXX_ARCH_XXX
 GO_PKGROOT  = ./...
 GO_PACKAGES = $(shell $(GO_LIST) $(GO_PKGROOT))
@@ -232,7 +232,6 @@ help:
 		code = strings.Replace(code, "XXX_CODE_XXX", filepath.Join("cmd", name, "main.go"), 1)
 	}
 	code = strings.Replace(code, "XXX_APP_XXX", name, 1)
-	code = strings.Replace(code, "XXX_OS_XXX", runtime.GOOS, 1)
 	code = strings.Replace(code, "XXX_ARCH_XXX", runtime.GOARCH, 1)
 	code = strings.Replace(code, "XXX_IMPORT_PATH_XXX", importPath, 1)
 	return path, code
