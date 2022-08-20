@@ -3,7 +3,6 @@ package target
 
 import (
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/nao1215/mkgoprj/v2/internal/gotool"
@@ -193,7 +192,7 @@ GO_TOOL     = $(GO) tool
 GO_VET      = $(GO) vet
 GO_DEP      = $(GO) mod
 GOOS        = ""
-GOARCH      = XXX_ARCH_XXX
+GOARCH      = ""
 GO_PKGROOT  = ./...
 GO_PACKAGES = $(shell $(GO_LIST) $(GO_PKGROOT))
 GO_LDFLAGS  = -ldflags '-X XXX_IMPORT_PATH_XXX/internal/cmdinfo.Version=${VERSION}'
@@ -232,7 +231,6 @@ help:
 		code = strings.Replace(code, "XXX_CODE_XXX", filepath.Join("cmd", name, "main.go"), 1)
 	}
 	code = strings.Replace(code, "XXX_APP_XXX", name, 1)
-	code = strings.Replace(code, "XXX_ARCH_XXX", runtime.GOARCH, 1)
 	code = strings.Replace(code, "XXX_IMPORT_PATH_XXX", importPath, 1)
 	return path, code
 }
