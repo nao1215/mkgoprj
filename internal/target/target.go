@@ -277,7 +277,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Set up Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v3
       with:
         go-version: "XXX_VER_XXX"
 
@@ -310,7 +310,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Set up Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v3
       with:
         go-version: "XXX_VER_XXX"
 
@@ -395,7 +395,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: "XXX_VER_XXX"
 
@@ -438,7 +438,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: "XXX_VER_XXX"
       - name: Run GoReleaser
