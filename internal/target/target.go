@@ -73,7 +73,7 @@ func Files(name, importPath string, lib, cli, noRoot bool) map[string]string {
 		files[path] = code
 	}
 
-	path, code := makefile(name, lib, cli, noRoot)
+	path, code := makefile(name, importPath, lib, cli, noRoot)
 	files[path] = code
 
 	path, code = changelogFile(name, noRoot)
@@ -84,7 +84,7 @@ func Files(name, importPath string, lib, cli, noRoot bool) map[string]string {
 		files[path] = code
 		path, code = githubRelease(name, noRoot)
 		files[path] = code
-		path, code = goreleaser(name, noRoot, cli)
+		path, code = goreleaser(name, importPath, noRoot, cli)
 		files[path] = code
 	}
 
@@ -171,7 +171,7 @@ func TestHelloWorld(t *testing.T) {
 	return path, code
 }
 
-func makefile(name string, libProject, cli, noRoot bool) (string, string) {
+func makefile(name, importPath string, libProject, cli, noRoot bool) (string, string) {
 	var path string
 	if noRoot {
 		path = "Makefile"
@@ -182,6 +182,7 @@ func makefile(name string, libProject, cli, noRoot bool) (string, string) {
 	code := `.PHONY: build test clean vet fmt chkfmt
 
 APP         = XXX_APP_XXX
+VERSION     = $(shell git describe --tags --abbrev=0)
 GO          = go
 GO_BUILD    = $(GO) build
 GO_FORMAT   = $(GO) fmt
@@ -191,10 +192,11 @@ GO_TEST     = $(GO) test -v
 GO_TOOL     = $(GO) tool
 GO_VET      = $(GO) vet
 GO_DEP      = $(GO) mod
-GOOS        = XXX_OS_XXX
+GOOS        = ""
 GOARCH      = XXX_ARCH_XXX
 GO_PKGROOT  = ./...
 GO_PACKAGES = $(shell $(GO_LIST) $(GO_PKGROOT))
+GO_LDFLAGS  = -ldflags '-X XXX_IMPORT_PATH_XXX/internal/cmdinfo.Version=${VERSION}'
 
 XXX_ONLY_APP_XXX
 
@@ -230,8 +232,8 @@ help:
 		code = strings.Replace(code, "XXX_CODE_XXX", filepath.Join("cmd", name, "main.go"), 1)
 	}
 	code = strings.Replace(code, "XXX_APP_XXX", name, 1)
-	code = strings.Replace(code, "XXX_OS_XXX", runtime.GOOS, 1)
 	code = strings.Replace(code, "XXX_ARCH_XXX", runtime.GOARCH, 1)
+	code = strings.Replace(code, "XXX_IMPORT_PATH_XXX", importPath, 1)
 	return path, code
 }
 
@@ -271,10 +273,10 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v3
       with:
         go-version: "XXX_VER_XXX"
 
@@ -304,10 +306,10 @@ jobs:
   unit-test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v3
       with:
         go-version: "XXX_VER_XXX"
 
@@ -334,7 +336,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           persist-credentials: false
       - name: golangci-lint
@@ -348,7 +350,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           persist-credentials: false
       - name: misspell
@@ -361,7 +363,7 @@ jobs:
   actionlint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: reviewdog/action-actionlint@v1
         with:
           reporter: github-pr-review
@@ -392,7 +394,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: "XXX_VER_XXX"
 
@@ -435,7 +437,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: "XXX_VER_XXX"
       - name: Run GoReleaser
@@ -450,7 +452,7 @@ jobs:
 	return path, data
 }
 
-func goreleaser(name string, noRoot, cli bool) (string, string) {
+func goreleaser(name, importPath string, noRoot, cli bool) (string, string) {
 	var path string
 	if noRoot {
 		path = filepath.Join(".goreleaser.yml")
@@ -467,7 +469,7 @@ before:
 builds:
   - main: XXX_BUILD_TARGET_XXX
     ldflags:
-      - -s -w
+      - -s -w -X XXX_IMPORT_PATH_XXX/internal/cmdinfo.Version=v{{ .Version }}
     env:
       - CGO_ENABLED=0
     goos:
@@ -498,6 +500,7 @@ changelog:
 `
 	data = strings.Replace(data, "XXX_APP_NAME_XXX", name, 1)
 	data = strings.Replace(data, "XXX_BUILD_TARGET_XXX", ".", 1)
+	data = strings.Replace(data, "XXX_IMPORT_PATH_XXX", name, 1)
 	return path, data
 }
 
@@ -553,9 +556,9 @@ import (
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Show " + cmdinfo.Name() + " command version information",
+	Short: "Show " + cmdinfo.Name + " command version information",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(cmdinfo.Version())
+		fmt.Println(cmdinfo.GetVersion())
 	},
 }
 
@@ -578,23 +581,27 @@ func cmdInfoFile(name string, noRoot bool) (string, string) {
 
 import (
 	"fmt"
+	"runtime/debug"
 )
 
-const (
-	name    = "XXX_NAME_XXX"
-	version = "0.0.1"
-)
+// Version value is set by ldflags
+var Version string
 
-// Version return command version.
-func Version() string {
-	return fmt.Sprintf("%s version %s (under Apache License version 2.0)",
-		Name(), version)
+// Name is command name
+const Name = "XXX_NAME_XXX"
+
+// GetVersion return gup command version.
+// Version global variable is set by ldflags.
+func GetVersion() string {
+	version := "unknown"
+	if Version != "" {
+		version = Version
+	} else if buildInfo, ok := debug.ReadBuildInfo(); ok {
+		version = buildInfo.Main.Version
+	}
+	return fmt.Sprintf("%s version %s", Name, version)
 }
 
-// Name return command name.
-func Name() string {
-	return name
-}
 `
 	data = strings.Replace(data, "XXX_NAME_XXX", name, 1)
 	return path, data
@@ -848,12 +855,12 @@ func bashCompletionFilePath() string {
 
 // fishCompletionFilePath return fish-completion file path.
 func fishCompletionFilePath() string {
-	return filepath.Join(os.Getenv("HOME"), ".config", "fish", "completions", cmdinfo.Name()+".fish")
+	return filepath.Join(os.Getenv("HOME"), ".config", "fish", "completions", cmdinfo.Name+".fish")
 }
 
 // zshCompletionFilePath return zsh-completion file path.
 func zshCompletionFilePath() string {
-	return filepath.Join(os.Getenv("HOME"), ".zsh", "completion", "_"+cmdinfo.Name())
+	return filepath.Join(os.Getenv("HOME"), ".zsh", "completion", "_"+cmdinfo.Name)
 }
 
 // zshrcPath return .zshrc path.
@@ -911,25 +918,25 @@ var (
 // Info print information message at STDOUT.
 func Info(msg string) {
 	fmt.Fprintf(Stdout, "%s:%s: %s\n",
-		cmdinfo.Name(), color.GreenString("INFO "), msg)
+		cmdinfo.Name, color.GreenString("INFO "), msg)
 }
 
 // Warn print warning message at STDERR.
 func Warn(err interface{}) {
 	fmt.Fprintf(Stderr, "%s:%s: %v\n",
-		cmdinfo.Name(), color.YellowString("WARN "), err)
+		cmdinfo.Name, color.YellowString("WARN "), err)
 }
 
 // Err print error message at STDERR.
 func Err(err interface{}) {
 	fmt.Fprintf(Stderr, "%s:%s: %v\n",
-		cmdinfo.Name(), color.HiYellowString("ERROR"), err)
+		cmdinfo.Name, color.HiYellowString("ERROR"), err)
 }
 
 // Fatal print dying message at STDERR.
 func Fatal(err interface{}) {
 	fmt.Fprintf(Stderr, "%s:%s: %v\n",
-		cmdinfo.Name(), color.RedString("FATAL"), err)
+		cmdinfo.Name, color.RedString("FATAL"), err)
 	os.Exit(1)
 }
 
@@ -938,7 +945,7 @@ func Question(ask string) bool {
 	var response string
 
 	fmt.Fprintf(Stdout, "%s:%s: %s",
-		cmdinfo.Name(), color.GreenString("CHECK"), ask+" [Y/n] ")
+		cmdinfo.Name, color.GreenString("CHECK"), ask+" [Y/n] ")
 	_, err := fmt.Scanln(&response)
 	if err != nil {
 		// If user input only enter.

@@ -2,20 +2,23 @@ package cmdinfo
 
 import (
 	"fmt"
+	"runtime/debug"
 )
 
-const (
-	name    = "mkgoprj"
-	version = "2.1.2"
-)
+// Version value is set by ldflags
+var Version string
 
-// Version return mkgoprj command version.
-func Version() string {
-	return fmt.Sprintf("%s version %s (under Apache License version 2.0)",
-		Name(), version)
-}
+// Name is command name
+const Name = "mkgoprj"
 
-// Name return command name.
-func Name() string {
-	return name
+// GetVersion return command version.
+// Version global variable is set by ldflags.
+func GetVersion() string {
+	version := "unknown"
+	if Version != "" {
+		version = Version
+	} else if buildInfo, ok := debug.ReadBuildInfo(); ok {
+		version = buildInfo.Main.Version
+	}
+	return fmt.Sprintf("%s version %s (under Apache License version 2.0)", Name, version)
 }

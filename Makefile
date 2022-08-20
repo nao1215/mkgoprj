@@ -1,6 +1,7 @@
 .PHONY: build test clean static_analysis lint vet fmt chkfmt
 
 APP         = mkgoprj
+VERSION     = $(shell git describe --tags --abbrev=0)
 GO          = go
 GO_BUILD    = $(GO) build
 GO_FORMAT   = $(GO) fmt
@@ -10,9 +11,10 @@ GO_TEST     = $(GO) test -v
 GO_VET      = $(GO) vet
 GO_DEP      = $(GO) mod
 GO_LDFLAGS  = -ldflags="-s -w"
-GOOS        = linux
+GOOS        = ""
 GO_PKGROOT  = ./...
 GO_PACKAGES = $(shell $(GO_LIST) $(GO_PKGROOT))
+GO_LDFLAGS  = -ldflags '-X github.com/nao1215/mkgoprj/v2/internal/cmdinfo.Version=${VERSION}'
 
 build:  ## Build binary 
 	env GO111MODULE=on GOOS=$(GOOS) $(GO_BUILD) $(GO_LDFLAGS) -o $(APP) main.go
