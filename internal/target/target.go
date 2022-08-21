@@ -87,8 +87,9 @@ func Files(name, importPath string, lib, cli, noRoot bool) map[string]string {
 		files[path] = code
 	}
 
-	path, code = githubContributors(name, noRoot)
-	files[path] = code
+	// contributor command has many bugs. Not use it.
+	//path, code = githubContributors(name, noRoot)
+	//files[path] = code
 
 	path, code = githubUnitTestYml(name, noRoot)
 	files[path] = code
