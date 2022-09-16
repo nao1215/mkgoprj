@@ -29,13 +29,9 @@ func Dirs(name string, lib, cli, noRoot bool) []string {
 	} else if cli {
 		if noRoot {
 			dirs = append(dirs, "cmd")
-			dirs = append(dirs, filepath.Join("internal", "cmdinfo"))
-			dirs = append(dirs, filepath.Join("internal", "completion"))
 			dirs = append(dirs, filepath.Join("internal", "print"))
 		} else {
 			dirs = append(dirs, filepath.Join(name, "cmd"))
-			dirs = append(dirs, filepath.Join(name, "internal", "cmdinfo"))
-			dirs = append(dirs, filepath.Join(name, "internal", "completion"))
 			dirs = append(dirs, filepath.Join(name, "internal", "print"))
 		}
 	}
@@ -62,13 +58,11 @@ func Files(name, importPath string, lib, cli, noRoot bool) map[string]string {
 	if cli {
 		path, code := rootFile(name, importPath, noRoot)
 		files[path] = code
-		path, code = versionFile(name, importPath, noRoot)
-		files[path] = code
-		path, code = cmdInfoFile(name, noRoot)
-		files[path] = code
-		path, code = completionFile(name, importPath, noRoot)
+		path, code = versionFile(name, noRoot)
 		files[path] = code
 		path, code = printFile(name, importPath, noRoot)
+		files[path] = code
+		path, code = printTestFile(name, noRoot)
 		files[path] = code
 	}
 
@@ -196,7 +190,7 @@ GOOS        = ""
 GOARCH      = ""
 GO_PKGROOT  = ./...
 GO_PACKAGES = $(shell $(GO_LIST) $(GO_PKGROOT))
-GO_LDFLAGS  = -ldflags '-X XXX_IMPORT_PATH_XXX/internal/cmdinfo.Version=${VERSION}'
+GO_LDFLAGS  = -ldflags '-X XXX_IMPORT_PATH_XXX/cmd.Version=${VERSION}'
 
 XXX_ONLY_APP_XXX
 
@@ -468,7 +462,7 @@ before:
 builds:
   - main: XXX_BUILD_TARGET_XXX
     ldflags:
-      - -s -w -X XXX_IMPORT_PATH_XXX/internal/cmdinfo.Version=v{{ .Version }}
+      - -s -w -X XXX_IMPORT_PATH_XXX/cmd.Version=v{{ .Version }}
     env:
       - CGO_ENABLED=0
     goos:
@@ -513,7 +507,13 @@ func rootFile(name, importPath string, noRoot bool) (string, string) {
 	data := `package cmd
 
 import (
-	"XXX_PATH_XXX/internal/completion"
+	"bytes"
+	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
+	"strings"
+
 	"XXX_PATH_XXX/internal/print"
 	"github.com/spf13/cobra"
 )
@@ -524,122 +524,32 @@ var rootCmd = &cobra.Command{
 
 // Execute start command.
 func Execute() {
+	if isWindows() {
+		print.Err("not support windows")
+		os.Exit(1)
+	}
+
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
-	completion.DeployShellCompletionFileIfNeeded(rootCmd)
+	rootCmd.SilenceErrors = true
+	deployShellCompletionFileIfNeeded(rootCmd)
 
 	if err := rootCmd.Execute(); err != nil {
-		print.Fatal(err)
-	}
-}
-`
-	data = strings.Replace(data, "XXX_PATH_XXX", importPath, -1)
-	data = strings.Replace(data, "XXX_CMD_XXX", name, 1)
-	return path, data
-}
-
-func versionFile(name, importPath string, noRoot bool) (string, string) {
-	var path string
-	if noRoot {
-		path = filepath.Join("cmd", "version.go")
-	} else {
-		path = filepath.Join(name, "cmd", "version.go")
-	}
-	data := `package cmd
-
-import (
-	"fmt"
-
-	"XXX_PATH_XXX/internal/cmdinfo"
-	"github.com/spf13/cobra"
-)
-
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Show " + cmdinfo.Name + " command version information",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(cmdinfo.GetVersion())
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(versionCmd)
-}
-`
-	data = strings.Replace(data, "XXX_PATH_XXX", importPath, 1)
-	return path, data
-}
-
-func cmdInfoFile(name string, noRoot bool) (string, string) {
-	var path string
-	if noRoot {
-		path = filepath.Join("internal", "cmdinfo", "cmdinfo.go")
-	} else {
-		path = filepath.Join(name, "internal", "cmdinfo", "cmdinfo.go")
-	}
-	data := `package cmdinfo
-
-import (
-	"fmt"
-	"runtime/debug"
-)
-
-// Version value is set by ldflags
-var Version string
-
-// Name is command name
-const Name = "XXX_NAME_XXX"
-
-// GetVersion return gup command version.
-// Version global variable is set by ldflags.
-func GetVersion() string {
-	version := "unknown"
-	if Version != "" {
-		version = Version
-	} else if buildInfo, ok := debug.ReadBuildInfo(); ok {
-		version = buildInfo.Main.Version
-	}
-	return fmt.Sprintf("%s version %s", Name, version)
-}
-
-`
-	data = strings.Replace(data, "XXX_NAME_XXX", name, 1)
-	return path, data
-}
-
-func completionFile(name, importPath string, noRoot bool) (string, string) {
-	var path string
-	if noRoot {
-		path = filepath.Join("internal", "completion", "completion.go")
-	} else {
-		path = filepath.Join(name, "internal", "completion", "completion.go")
-	}
-	data := `package completion
-
-import (
-	"bytes"
-	"fmt"
-	"os"
-	"path/filepath"
-	"runtime"
-	"strings"
-
-	"XXX_PATH_XXX/internal/cmdinfo"
-	"XXX_PATH_XXX/internal/print"
-	"github.com/spf13/cobra"
-)
-
-// DeployShellCompletionFileIfNeeded creates the shell completion file.
-// If the file with the same contents already exists, it is not created.
-func DeployShellCompletionFileIfNeeded(cmd *cobra.Command) {
-	if !isWindows() {
-		makeBashCompletionFileIfNeeded(cmd)
-		makeFishCompletionFileIfNeeded(cmd)
-		makeZshCompletionFileIfNeeded(cmd)
+		os.Exit(1)
 	}
 }
 
 func isWindows() bool {
 	return runtime.GOOS == "windows"
+}
+
+// deployShellCompletionFileIfNeeded creates the shell completion file.
+// If the file with the same contents already exists, it is not created.
+func deployShellCompletionFileIfNeeded(cmd *cobra.Command) {
+	if !isWindows() {
+		makeBashCompletionFileIfNeeded(cmd)
+		makeFishCompletionFileIfNeeded(cmd)
+		makeZshCompletionFileIfNeeded(cmd)
+	}
 }
 
 func makeBashCompletionFileIfNeeded(cmd *cobra.Command) {
@@ -854,12 +764,12 @@ func bashCompletionFilePath() string {
 
 // fishCompletionFilePath return fish-completion file path.
 func fishCompletionFilePath() string {
-	return filepath.Join(os.Getenv("HOME"), ".config", "fish", "completions", cmdinfo.Name+".fish")
+	return filepath.Join(os.Getenv("HOME"), ".config", "fish", "completions", Name+".fish")
 }
 
 // zshCompletionFilePath return zsh-completion file path.
 func zshCompletionFilePath() string {
-	return filepath.Join(os.Getenv("HOME"), ".zsh", "completion", "_"+cmdinfo.Name)
+	return filepath.Join(os.Getenv("HOME"), ".zsh", "completion", "_"+Name)
 }
 
 // zshrcPath return .zshrc path.
@@ -885,6 +795,56 @@ autoload -Uz compinit && compinit -i
 	data = strings.Replace(data, "XXX_PATH_XXX", importPath, -1)
 	data = strings.Replace(data, "XXX_NAME_XXX", name, -1)
 	data = strings.Replace(data, "XXX_ZSH_FPATH_XXX", zshFpath, 1)
+
+	return path, data
+}
+
+func versionFile(name string, noRoot bool) (string, string) {
+	var path string
+	if noRoot {
+		path = filepath.Join("cmd", "version.go")
+	} else {
+		path = filepath.Join(name, "cmd", "version.go")
+	}
+	data := `package cmd
+
+import (
+	"fmt"
+	"runtime/debug"
+
+	"github.com/spf13/cobra"
+)
+
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Show " + Name + " command version information",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getVersion())
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(versionCmd)
+}
+
+// Version value is set by s
+var Version string
+
+// Name is command name
+const Name = "morrigan"
+
+// getVersion return gup command version.
+// Version global variable is set by s.
+func getVersion() string {
+	version := "unknown"
+	if Version != "" {
+		version = Version
+	} else if buildInfo, ok := debug.ReadBuildInfo(); ok {
+		version = buildInfo.Main.Version
+	}
+	return fmt.Sprintf("%s version %s", Name, version)
+}
+`
 	return path, data
 }
 
@@ -895,7 +855,8 @@ func printFile(name, importPath string, noRoot bool) (string, string) {
 	} else {
 		path = filepath.Join(name, "internal", "print", "print.go")
 	}
-	data := `package print
+	data := `// Package print defines functions to accept colored standard output and user input
+package print
 
 import (
 	"fmt"
@@ -904,7 +865,6 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/mattn/go-colorable"
-	"XXX_PATH_XXX/internal/cmdinfo"
 )
 
 var (
@@ -914,38 +874,43 @@ var (
 	Stderr = colorable.NewColorableStderr()
 )
 
-// Info print information message at STDOUT.
+// Info print information message at STDOUT in green.
+// This function is used to print some information (that is not error) to the user.
 func Info(msg string) {
-	fmt.Fprintf(Stdout, "%s:%s: %s\n",
-		cmdinfo.Name, color.GreenString("INFO "), msg)
+	fmt.Fprintf(Stdout, "%s: %s\n", color.GreenString("INFO "), msg)
 }
 
-// Warn print warning message at STDERR.
+// Warn print warning message at STDERR in yellow.
+// This function is used to print warning message to the user.
 func Warn(err interface{}) {
-	fmt.Fprintf(Stderr, "%s:%s: %v\n",
-		cmdinfo.Name, color.YellowString("WARN "), err)
+	fmt.Fprintf(Stderr, "%s: %v\n", color.YellowString("WARN "), err)
 }
 
-// Err print error message at STDERR.
+// Err print error message at STDERR in yellow.
+// This function is used to print error message to the user.
 func Err(err interface{}) {
-	fmt.Fprintf(Stderr, "%s:%s: %v\n",
-		cmdinfo.Name, color.HiYellowString("ERROR"), err)
+	fmt.Fprintf(Stderr, "%s: %v\n", color.HiYellowString("ERROR"), err)
 }
 
-// Fatal print dying message at STDERR.
+// OsExit is wrapper for  os.Exit(). It's for unit test.
+var OsExit = os.Exit
+
+// Fatal print dying message at STDERR in red.
+// After print message, process will exit
 func Fatal(err interface{}) {
-	fmt.Fprintf(Stderr, "%s:%s: %v\n",
-		cmdinfo.Name, color.RedString("FATAL"), err)
-	os.Exit(1)
+	fmt.Fprintf(Stderr, "%s: %v\n", color.RedString("FATAL"), err)
+	OsExit(1)
 }
+
+// FmtScanln is wrapper for fmt.Scanln(). It's for unit test.
+var FmtScanln = fmt.Scanln
 
 // Question displays the question in the terminal and receives an answer from the user.
 func Question(ask string) bool {
 	var response string
 
-	fmt.Fprintf(Stdout, "%s:%s: %s",
-		cmdinfo.Name, color.GreenString("CHECK"), ask+" [Y/n] ")
-	_, err := fmt.Scanln(&response)
+	fmt.Fprintf(Stdout, "%s: %s", color.GreenString("CHECK"), ask+" [Y/n] ")
+	_, err := FmtScanln(&response)
 	if err != nil {
 		// If user input only enter.
 		if strings.Contains(err.Error(), "expected newline") {
@@ -963,10 +928,358 @@ func Question(ask string) bool {
 	default:
 		return Question(ask)
 	}
-}	
+}
 `
-
 	data = strings.Replace(data, "XXX_PATH_XXX", importPath, -1)
+	return path, data
+}
+
+func printTestFile(name string, noRoot bool) (string, string) {
+	var path string
+	if noRoot {
+		path = filepath.Join("internal", "print", "print_test.go")
+	} else {
+		path = filepath.Join(name, "internal", "print", "print_test.go")
+	}
+	data := `// Package print defines functions to accept colored standard output and user input
+package print
+
+import (
+	"bytes"
+	"errors"
+	"io"
+	"os"
+	"strings"
+	"testing"
+
+	"github.com/google/go-cmp/cmp"
+)
+
+func TestInfo(t *testing.T) {
+	type args struct {
+		msg string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			name: "Print message",
+			args: args{
+				msg: "test message",
+			},
+			want: []string{"INFO : test message", ""},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			orgStdout := Stdout
+			orgStderr := Stderr
+			pr, pw, err := os.Pipe()
+			if err != nil {
+				t.Fatal(err)
+			}
+			Stdout = pw
+			Stderr = pw
+
+			Info(tt.args.msg)
+			pw.Close()
+			Stdout = orgStdout
+			Stderr = orgStderr
+
+			if err != nil {
+				return
+			}
+
+			buf := bytes.Buffer{}
+			_, err = io.Copy(&buf, pr)
+			if err != nil {
+				t.Error(err)
+			}
+			got := strings.Split(buf.String(), "\n")
+
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("value is mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestWarn(t *testing.T) {
+	type args struct {
+		msg string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			name: "Print message",
+			args: args{
+				msg: "test message",
+			},
+			want: []string{"WARN : test message", ""},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			orgStdout := Stdout
+			orgStderr := Stderr
+			pr, pw, err := os.Pipe()
+			if err != nil {
+				t.Fatal(err)
+			}
+			Stdout = pw
+			Stderr = pw
+
+			Warn(tt.args.msg)
+			pw.Close()
+			Stdout = orgStdout
+			Stderr = orgStderr
+
+			if err != nil {
+				return
+			}
+
+			buf := bytes.Buffer{}
+			_, err = io.Copy(&buf, pr)
+			if err != nil {
+				t.Error(err)
+			}
+			got := strings.Split(buf.String(), "\n")
+
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("value is mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestErr(t *testing.T) {
+	type args struct {
+		msg string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			name: "Print message",
+			args: args{
+				msg: "test message",
+			},
+			want: []string{"ERROR: test message", ""},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			orgStdout := Stdout
+			orgStderr := Stderr
+			pr, pw, err := os.Pipe()
+			if err != nil {
+				t.Fatal(err)
+			}
+			Stdout = pw
+			Stderr = pw
+
+			Err(tt.args.msg)
+			pw.Close()
+			Stdout = orgStdout
+			Stderr = orgStderr
+
+			if err != nil {
+				return
+			}
+
+			buf := bytes.Buffer{}
+			_, err = io.Copy(&buf, pr)
+			if err != nil {
+				t.Error(err)
+			}
+			got := strings.Split(buf.String(), "\n")
+
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("value is mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestFatal(t *testing.T) {
+	type args struct {
+		msg string
+	}
+	tests := []struct {
+		name     string
+		args     args
+		want     []string
+		exitcode int
+	}{
+		{
+			name: "Print message",
+			args: args{
+				msg: "test message",
+			},
+			want:     []string{"FATAL: test message", ""},
+			exitcode: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			orgStdout := Stdout
+			orgStderr := Stderr
+			pr, pw, err := os.Pipe()
+			if err != nil {
+				t.Fatal(err)
+			}
+			Stdout = pw
+			Stderr = pw
+
+			orgOsExit := OsExit
+			exitCode := 0
+			OsExit = func(code int) {
+				exitCode = code
+			}
+			defer func() { OsExit = orgOsExit }()
+
+			Fatal(tt.args.msg)
+			pw.Close()
+			Stdout = orgStdout
+			Stderr = orgStderr
+
+			if err != nil {
+				return
+			}
+
+			buf := bytes.Buffer{}
+			_, err = io.Copy(&buf, pr)
+			if err != nil {
+				t.Error(err)
+			}
+			got := strings.Split(buf.String(), "\n")
+
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("value is mismatch (-want +got):\n%s", diff)
+			}
+
+			if exitCode != tt.exitcode {
+				t.Errorf("value is mismatch. want=%d got=%d", exitCode, tt.exitcode)
+			}
+		})
+	}
+}
+
+func TestQuestion(t *testing.T) {
+	type args struct {
+		ask string
+	}
+	tests := []struct {
+		name  string
+		args  args
+		input string
+		want  bool
+	}{
+		{
+			name:  "user input 'y'",
+			args:  args{"no check"},
+			input: "y",
+			want:  true,
+		},
+		{
+			name:  "user input 'yes'",
+			args:  args{"no check"},
+			input: "yes",
+			want:  true,
+		},
+		{
+			name:  "user input 'n'",
+			args:  args{"no check"},
+			input: "n",
+			want:  false,
+		},
+		{
+			name:  "user input 'no'",
+			args:  args{"no check"},
+			input: "no",
+			want:  false,
+		},
+		{
+			name:  "user input 'yes' after 'a'",
+			args:  args{"no check"},
+			input: "a\nyes",
+			want:  true,
+		},
+		{
+			name:  "user only input enter",
+			args:  args{"no check"},
+			input: "\nyes",
+			want:  true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			funcDefer, err := mockStdin(t, tt.input)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer funcDefer()
+
+			if got := Question(tt.args.ask); got != tt.want {
+				t.Errorf("Question() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestQuestion_FmtScanlnErr(t *testing.T) {
+	t.Run("fmt.Scanln() return error", func(t *testing.T) {
+		orgFmtScanln := FmtScanln
+		FmtScanln = func(a ...any) (n int, err error) {
+			return -1, errors.New("some error")
+		}
+		defer func() { FmtScanln = orgFmtScanln }()
+
+		if got := Question("no check"); got != false {
+			t.Errorf("Question() = %v, want %v", got, false)
+		}
+	})
+}
+
+// mockStdin is a helper function that lets the test pretend dummyInput as os.Stdin.
+// It will return a function for defer to clean up after the test.
+func mockStdin(t *testing.T, dummyInput string) (funcDefer func(), err error) {
+	t.Helper()
+
+	oldOsStdin := os.Stdin
+	tmpFile, err := os.CreateTemp(t.TempDir(), "morrigan_")
+
+	if err != nil {
+		return nil, err
+	}
+
+	content := []byte(dummyInput)
+
+	if _, err := tmpFile.Write(content); err != nil {
+		return nil, err
+	}
+
+	if _, err := tmpFile.Seek(0, 0); err != nil {
+		return nil, err
+	}
+
+	// Set stdin to the temp file
+	os.Stdin = tmpFile
+
+	return func() {
+		// clean up
+		os.Stdin = oldOsStdin
+		os.Remove(tmpFile.Name())
+	}, nil
+}
+`
 	return path, data
 }
 
