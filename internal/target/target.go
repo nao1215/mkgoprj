@@ -29,13 +29,9 @@ func Dirs(name string, lib, cli, noRoot bool) []string {
 	} else if cli {
 		if noRoot {
 			dirs = append(dirs, "cmd")
-			dirs = append(dirs, filepath.Join("internal", "cmdinfo"))
-			dirs = append(dirs, filepath.Join("internal", "completion"))
 			dirs = append(dirs, filepath.Join("internal", "print"))
 		} else {
 			dirs = append(dirs, filepath.Join(name, "cmd"))
-			dirs = append(dirs, filepath.Join(name, "internal", "cmdinfo"))
-			dirs = append(dirs, filepath.Join(name, "internal", "completion"))
 			dirs = append(dirs, filepath.Join(name, "internal", "print"))
 		}
 	}
@@ -62,11 +58,7 @@ func Files(name, importPath string, lib, cli, noRoot bool) map[string]string {
 	if cli {
 		path, code := rootFile(name, importPath, noRoot)
 		files[path] = code
-		path, code = versionFile(name, importPath, noRoot)
-		files[path] = code
-		path, code = cmdInfoFile(name, noRoot)
-		files[path] = code
-		path, code = completionFile(name, importPath, noRoot)
+		path, code = versionFile(name, noRoot)
 		files[path] = code
 		path, code = printFile(name, importPath, noRoot)
 		files[path] = code
@@ -198,7 +190,7 @@ GOOS        = ""
 GOARCH      = ""
 GO_PKGROOT  = ./...
 GO_PACKAGES = $(shell $(GO_LIST) $(GO_PKGROOT))
-GO_LDFLAGS  = -ldflags '-X XXX_IMPORT_PATH_XXX/internal/cmdinfo.Version=${VERSION}'
+GO_LDFLAGS  = -ldflags '-X XXX_IMPORT_PATH_XXX/cmd.Version=${VERSION}'
 
 XXX_ONLY_APP_XXX
 
@@ -470,7 +462,7 @@ before:
 builds:
   - main: XXX_BUILD_TARGET_XXX
     ldflags:
-      - -s -w -X XXX_IMPORT_PATH_XXX/internal/cmdinfo.Version=v{{ .Version }}
+      - -s -w -X XXX_IMPORT_PATH_XXX/cmd.Version=v{{ .Version }}
     env:
       - CGO_ENABLED=0
     goos:
@@ -515,7 +507,13 @@ func rootFile(name, importPath string, noRoot bool) (string, string) {
 	data := `package cmd
 
 import (
-	"XXX_PATH_XXX/internal/completion"
+	"bytes"
+	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
+	"strings"
+
 	"XXX_PATH_XXX/internal/print"
 	"github.com/spf13/cobra"
 )
@@ -526,122 +524,32 @@ var rootCmd = &cobra.Command{
 
 // Execute start command.
 func Execute() {
+	if isWindows() {
+		print.Err("not support windows")
+		os.Exit(1)
+	}
+
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
-	completion.DeployShellCompletionFileIfNeeded(rootCmd)
+	rootCmd.SilenceErrors = true
+	deployShellCompletionFileIfNeeded(rootCmd)
 
 	if err := rootCmd.Execute(); err != nil {
-		print.Fatal(err)
-	}
-}
-`
-	data = strings.Replace(data, "XXX_PATH_XXX", importPath, -1)
-	data = strings.Replace(data, "XXX_CMD_XXX", name, 1)
-	return path, data
-}
-
-func versionFile(name, importPath string, noRoot bool) (string, string) {
-	var path string
-	if noRoot {
-		path = filepath.Join("cmd", "version.go")
-	} else {
-		path = filepath.Join(name, "cmd", "version.go")
-	}
-	data := `package cmd
-
-import (
-	"fmt"
-
-	"XXX_PATH_XXX/internal/cmdinfo"
-	"github.com/spf13/cobra"
-)
-
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Show " + cmdinfo.Name + " command version information",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(cmdinfo.GetVersion())
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(versionCmd)
-}
-`
-	data = strings.Replace(data, "XXX_PATH_XXX", importPath, 1)
-	return path, data
-}
-
-func cmdInfoFile(name string, noRoot bool) (string, string) {
-	var path string
-	if noRoot {
-		path = filepath.Join("internal", "cmdinfo", "cmdinfo.go")
-	} else {
-		path = filepath.Join(name, "internal", "cmdinfo", "cmdinfo.go")
-	}
-	data := `package cmdinfo
-
-import (
-	"fmt"
-	"runtime/debug"
-)
-
-// Version value is set by ldflags
-var Version string
-
-// Name is command name
-const Name = "XXX_NAME_XXX"
-
-// GetVersion return gup command version.
-// Version global variable is set by ldflags.
-func GetVersion() string {
-	version := "unknown"
-	if Version != "" {
-		version = Version
-	} else if buildInfo, ok := debug.ReadBuildInfo(); ok {
-		version = buildInfo.Main.Version
-	}
-	return fmt.Sprintf("%s version %s", Name, version)
-}
-
-`
-	data = strings.Replace(data, "XXX_NAME_XXX", name, 1)
-	return path, data
-}
-
-func completionFile(name, importPath string, noRoot bool) (string, string) {
-	var path string
-	if noRoot {
-		path = filepath.Join("internal", "completion", "completion.go")
-	} else {
-		path = filepath.Join(name, "internal", "completion", "completion.go")
-	}
-	data := `package completion
-
-import (
-	"bytes"
-	"fmt"
-	"os"
-	"path/filepath"
-	"runtime"
-	"strings"
-
-	"XXX_PATH_XXX/internal/cmdinfo"
-	"XXX_PATH_XXX/internal/print"
-	"github.com/spf13/cobra"
-)
-
-// DeployShellCompletionFileIfNeeded creates the shell completion file.
-// If the file with the same contents already exists, it is not created.
-func DeployShellCompletionFileIfNeeded(cmd *cobra.Command) {
-	if !isWindows() {
-		makeBashCompletionFileIfNeeded(cmd)
-		makeFishCompletionFileIfNeeded(cmd)
-		makeZshCompletionFileIfNeeded(cmd)
+		os.Exit(1)
 	}
 }
 
 func isWindows() bool {
 	return runtime.GOOS == "windows"
+}
+
+// deployShellCompletionFileIfNeeded creates the shell completion file.
+// If the file with the same contents already exists, it is not created.
+func deployShellCompletionFileIfNeeded(cmd *cobra.Command) {
+	if !isWindows() {
+		makeBashCompletionFileIfNeeded(cmd)
+		makeFishCompletionFileIfNeeded(cmd)
+		makeZshCompletionFileIfNeeded(cmd)
+	}
 }
 
 func makeBashCompletionFileIfNeeded(cmd *cobra.Command) {
@@ -856,12 +764,12 @@ func bashCompletionFilePath() string {
 
 // fishCompletionFilePath return fish-completion file path.
 func fishCompletionFilePath() string {
-	return filepath.Join(os.Getenv("HOME"), ".config", "fish", "completions", cmdinfo.Name+".fish")
+	return filepath.Join(os.Getenv("HOME"), ".config", "fish", "completions", Name+".fish")
 }
 
 // zshCompletionFilePath return zsh-completion file path.
 func zshCompletionFilePath() string {
-	return filepath.Join(os.Getenv("HOME"), ".zsh", "completion", "_"+cmdinfo.Name)
+	return filepath.Join(os.Getenv("HOME"), ".zsh", "completion", "_"+Name)
 }
 
 // zshrcPath return .zshrc path.
@@ -887,6 +795,56 @@ autoload -Uz compinit && compinit -i
 	data = strings.Replace(data, "XXX_PATH_XXX", importPath, -1)
 	data = strings.Replace(data, "XXX_NAME_XXX", name, -1)
 	data = strings.Replace(data, "XXX_ZSH_FPATH_XXX", zshFpath, 1)
+
+	return path, data
+}
+
+func versionFile(name string, noRoot bool) (string, string) {
+	var path string
+	if noRoot {
+		path = filepath.Join("cmd", "version.go")
+	} else {
+		path = filepath.Join(name, "cmd", "version.go")
+	}
+	data := `package cmd
+
+import (
+	"fmt"
+	"runtime/debug"
+
+	"github.com/spf13/cobra"
+)
+
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "Show " + Name + " command version information",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(getVersion())
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(versionCmd)
+}
+
+// Version value is set by s
+var Version string
+
+// Name is command name
+const Name = "morrigan"
+
+// getVersion return gup command version.
+// Version global variable is set by s.
+func getVersion() string {
+	version := "unknown"
+	if Version != "" {
+		version = Version
+	} else if buildInfo, ok := debug.ReadBuildInfo(); ok {
+		version = buildInfo.Main.Version
+	}
+	return fmt.Sprintf("%s version %s", Name, version)
+}
+`
 	return path, data
 }
 
@@ -907,7 +865,6 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/mattn/go-colorable"
-	"XXX_PATH_XXX/internal/cmdinfo"
 )
 
 var (
@@ -952,8 +909,7 @@ var FmtScanln = fmt.Scanln
 func Question(ask string) bool {
 	var response string
 
-	fmt.Fprintf(Stdout, "%s:%s: %s",
-		cmdinfo.Name, color.GreenString("CHECK"), ask+" [Y/n] ")
+	fmt.Fprintf(Stdout, "%s: %s", color.GreenString("CHECK"), ask+" [Y/n] ")
 	_, err := FmtScanln(&response)
 	if err != nil {
 		// If user input only enter.
