@@ -85,7 +85,7 @@ func Files(name, importPath string, lib, cli, noRoot bool) map[string]string {
 	//path, code = githubContributors(name, noRoot)
 	//files[path] = code
 
-	path, code = githubUnitTestYml(name, noRoot)
+	path, code = githubPlatformTest(name, noRoot)
 	files[path] = code
 
 	path, code = githubReviewDog(name, noRoot)
@@ -280,36 +280,45 @@ jobs:
 	return path, data
 }
 
-func githubUnitTestYml(name string, noRoot bool) (string, string) {
+func githubPlatformTest(name string, noRoot bool) (string, string) {
 	var path string
 	if noRoot {
-		path = filepath.Join(".github", "workflows", "unit_test.yml")
+		path = filepath.Join(".github", "workflows", "platform_test.yml")
 	} else {
-		path = filepath.Join(name, ".github", "workflows", "unit_test.yml")
+		path = filepath.Join(name, ".github", "workflows", "platform_test.yml")
 	}
-	data := `name: UnitTest
+	data := `name: PlatformTests
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-  unit-test:
-    runs-on: ubuntu-latest
+  unit_test:
+    name: Unit test
+
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+
+    runs-on: ${{ matrix.platform }}
+
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: "XXX_VER_XXX"
+      - uses: actions/setup-go@v3
+        with:
+          go-version: "1"
+          check-latest: true
 
-    - name: UnitTest
-      run: make test
+      - name: Run unit test
+        run: |
+          go mod download
+          go test -race -v ./...
 `
-	data = strings.Replace(data, "XXX_VER_XXX", gotool.Version(), 1)
 	return path, data
 }
 
