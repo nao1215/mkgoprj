@@ -528,16 +528,11 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use: "XXX_CMD_XXX",
+	Use: "XXX_NAME_XXX",
 }
 
 // Execute start command.
 func Execute() {
-	if isWindows() {
-		print.Err("not support windows")
-		os.Exit(1)
-	}
-
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 	rootCmd.SilenceErrors = true
 	deployShellCompletionFileIfNeeded(rootCmd)
@@ -840,7 +835,7 @@ func init() {
 var Version string
 
 // Name is command name
-const Name = "morrigan"
+const Name = "XXX_CMD_XXX"
 
 // getVersion return gup command version.
 // Version global variable is set by s.
@@ -854,6 +849,7 @@ func getVersion() string {
 	return fmt.Sprintf("%s version %s", Name, version)
 }
 `
+	data = strings.Replace(data, "XXX_CMD_XXX", name, -1)
 	return path, data
 }
 
@@ -1263,7 +1259,7 @@ func mockStdin(t *testing.T, dummyInput string) (funcDefer func(), err error) {
 	t.Helper()
 
 	oldOsStdin := os.Stdin
-	tmpFile, err := os.CreateTemp(t.TempDir(), "morrigan_")
+	tmpFile, err := os.CreateTemp(t.TempDir(), "XXX_CMD_NAME")
 
 	if err != nil {
 		return nil, err
@@ -1289,6 +1285,7 @@ func mockStdin(t *testing.T, dummyInput string) (funcDefer func(), err error) {
 	}, nil
 }
 `
+	data = strings.Replace(data, "XXX_CMD_NAME", name+"_", 1)
 	return path, data
 }
 
