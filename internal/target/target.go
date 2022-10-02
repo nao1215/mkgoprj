@@ -798,6 +798,7 @@ autoload -Uz compinit && compinit -i
 
 	data = strings.Replace(data, "XXX_PATH_XXX", importPath, -1)
 	data = strings.Replace(data, "XXX_NAME_XXX", name, -1)
+	zshFpath = strings.Replace(zshFpath, "XXX_NAME_XXX", name, 1)
 	data = strings.Replace(data, "XXX_ZSH_FPATH_XXX", zshFpath, 1)
 
 	return path, data
